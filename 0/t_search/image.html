@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Image Search</title>
+        <link rel="stylesheet" type="text/css" href="universal.css">
+        <style>
+            #clear_image {
+                border-right: 1px solid gray;
+                padding: 0 1em;
+            }
+            img {
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Search</a></li>
+                    <li><a href="advanced.html">Advanced Search</a></li>
+                </ul>
+            </nav>
+        </header>
+        <main>
+            <section id="search-container">
+                <h1 id="logo_heading"></h1>
+                <form action="https://google.com/search">
+                    <input type="text" name="tbm" value="isch" class="hidden"> 
+                    <div id="input">
+                        <label for="search">
+                            <img src="search.svg" alt="Search Icon" width="15px" height="15px" draggable="false">
+                        </label>
+                        <input id="search" type="text" name="q" autocomplete="off" autofocus>
+                        <img id="clear_image" class="hidden" src="x.svg" alt="Clear Icon" width="15px" height="15px" draggable="false">
+                        <div style="position: relative; padding: 0 1em; height: 100%;">
+                            <img id="search_action" style="position: absolute; top: 50%; transform: translateY(-50%);" src="search_action.svg" alt="Search Action Icon" width="15px" height="15px" draggable="false">
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </main>
+        <script>
+            const search_action = document.querySelector('#search_action');
+            search_action.addEventListener('click', function() {
+                document.querySelector('form').submit();
+            })
+        </script>
+        <script src="universal.js"></script>
+    </body>
+</html>

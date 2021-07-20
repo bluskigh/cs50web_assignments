@@ -1,0 +1,1 @@
+it helpts to think of the html structure as a tree strucutre, that is called document object model, otherwise known as DOM.

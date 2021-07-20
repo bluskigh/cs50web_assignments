@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Search</title>
+        <link rel="stylesheet" type="text/css" href="universal.css">
+    </head>
+    <body>
+        <header>
+            <nav>
+                <ul>
+                    <li><a href="image.html">Image Search</a></li>
+                    <li><a href="advanced.html">Advanced Search</a></li>
+                </ul>
+            </nav>
+        </header>
+        <main>
+            <section id="search-container">
+                <h1 id="logo_heading"></h1>
+                <form action="https://google.com/search">
+                    <div id="input">
+                        <label for="search">
+                            <img src="search.svg" alt="Search Icon" width="15px" height="15px" draggable="false">
+                        </label>
+                        <input id="search" type="text" name="q" autocomplete="off" autofocus>
+                        <img id="clear_image" class="hidden" src="x.svg" alt="Clear Icon" width="15px" height="15px" draggable="false">
+                    </div>
+                    <div>
+                        <button type="submit">Google Search</button>
+                        <button type="button">Im Feeeling Lucky</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+        <script src="universal.js"></script>
+    </body>
+</html>
