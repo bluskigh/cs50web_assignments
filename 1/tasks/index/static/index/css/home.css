@@ -1,0 +1,30 @@
+html, body, ul {
+    margin: 0;
+    padding: 0;
+}
+body {
+    text-align: center;
+    width: 50%;
+    margin: 0 auto;
+}
+main {
+    
+}
+#form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#options {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.hidden {
+        display: none;
+        user-select: none;
+        z-index: -10000;
+}
+.active {
+    opacity: .6;
+}

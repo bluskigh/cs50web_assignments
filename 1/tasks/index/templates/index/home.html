@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, intial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="{% load static %}{% static 'index/css/home.css' %}">
+        <title>Tasks</title>
+    </head>
+    <body>
+        <main>
+                <h1>CS50 Tasks Application</h1>
+                <form id="form" action="/tasks" method="POST">
+                {% csrf_token %}
+                        {{ form }}
+                        <button id="addtodo" type="submit">Add</button>
+                </form>
+                <section id="options">
+                        <button id="todooption" class="active" disabled="">Todo</button>
+                        <button id="doneoption">Done</button>
+                </section>
+                <section id="body">
+                        <ul id="todocontainer">
+                            Todo List
+                            {% for task in tasks %}
+                            <li>{{task}}</li>
+                            {% endfor %}
+                        </ul>
+                        <ul id="donecontainer" class="hidden">
+                            Done List
+                            {% for task in done %}
+                            <li>{{task}}</li>
+                            {% endfor %}
+                        </ul>
+                </section>
+        </main>
+        <script src="{% static 'index/js/home.js' %}"></script>
+    </body>
+</html>

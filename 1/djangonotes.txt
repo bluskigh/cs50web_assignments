@@ -58,3 +58,49 @@ IN the application that this is being run make sure to provide a template folder
 Unlike flask where you can provide multiple variables past the location of the rendering template file (*kwargS) this method has 3 arguments, the third argument being a dictionary of values that you would like to provide to the template. 
 
 In flask to make a relative path to a static file youw ould do the following: {{url('static', filename='index.css')}}, but in django templating engine you have to do the following: {% static 'index.css' %}
+
+in urls.py you can proide app_name which can be used when referncing and helps avoid namespace collision. app_name:index
+
+In javascript you have to provide csrf token when posting, if you are using ajax you have to provide that csrf token through the headers. https://docs.djangoproject.com/en/3.2/ref/csrf/#ajax
+
+You can use a View as the base for a route where you can then separate get and post functions https://stackoverflow.com/questions/16668441/django-get-and-post-handling-methods#16669043
+
+
+You can create a form class by having the base class be forms.Forms
+
+'''
+from django import forms
+class TempForm(forms.Form):
+    name = forms.CharField(label='Enter Name: ')
+'''
+
+Now if you want check the data you can do the following in a post handler
+
+'''
+...
+    if request.method == 'POST':
+        # we are filling the class TempForm with the data that is being passed through the request via POST method
+        form = TempForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data.get('name')
+            # do something with the name data here
+        else:
+            # this way we can show the errors, but will most likely not use instead will use a flash and redirect to the user the necessasry page
+            return render(request, 'tasks/add.html', {
+                'form': form 
+            }
+'''
+
+from django.urls improt reverse
+# try to reverse engineer what the locatino of the index route is
+
+HttpsResponseRedirect(reverse('tasks:index'))
+
+ruin the following to give django access to the session table
+''' allows to create all the default tables inside djangos database
+python3 manage.py migrate
+'''
+
+There is an empty condition, used in for loop
+{% empty %}
+<p> there is nothing in the list </p> 
