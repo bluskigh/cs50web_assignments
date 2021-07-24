@@ -1,0 +1,60 @@
+http = stateless protocol that is used to commincate over the internet, client server model.
+
+''' installing django
+pip3 install Django
+'''
+
+''' creating a django project in terminal
+django-admin startproject lecture3
+'''
+
+manage.py is going to use used to execute commands on the project.
+
+'''
+python manage.py ____
+ex: python manage.py runserver
+    python manage.py startapp hello
+'''
+
+settings.py contains important configuration settings for our django project, comes preloaded, but can be changed.
+
+urls.py table of contents for web application, routes that a web application can be visited.
+
+you can have multiple apps in a single project, as for example google has google images, google pictures, etc.
+
+''' to create path use: from django.urls import path
+urlpatterns = [
+    path('', views.index, name='index')
+    ###
+    name is used to reference to this path later on in the project
+    '' is equal to / route, but if name is given ex: 'blog' == '/blog'
+    views.index is referencing to the index function inside of the viwes module, therefore its important to import
+    your views page: from . import views
+    ###
+]
+'''
+
+In the parent url configuration file make sure to provide all urls that a certain app will cotain:
+from django.urls import path, include
+urlpatterns = [
+    ...default admin path that is always created,
+    path('hello/', include('hello.urls'))
+    ###
+    What we are saying here is to include all the urls int he urlpatterns configuration of the hello app to append the 'hello/' route.
+    ###
+]
+
+In flask in order to create a route function you have to wrap in decorator which by default is provided the request information, but in django the request information is needed in params and no decorator is provided.  
+
+from django.http import HttpResponse
+def index(request):
+    return HttpResponse('hello world')
+
+To render an item just as in flask you can use a render method:
+    return render(request, 'hello/index.html')
+
+IN the application that this is being run make sure to provide a template folder, just as in flask both framework look for a template folder in the app directory, in this case above, hello is a folder inside the template folder and index.html is a file inside the template/hello folder
+
+Unlike flask where you can provide multiple variables past the location of the rendering template file (*kwargS) this method has 3 arguments, the third argument being a dictionary of values that you would like to provide to the template. 
+
+In flask to make a relative path to a static file youw ould do the following: {{url('static', filename='index.css')}}, but in django templating engine you have to do the following: {% static 'index.css' %}
