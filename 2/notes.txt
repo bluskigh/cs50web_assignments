@@ -1,0 +1,64 @@
+SQL, Models, and Migrations
+-------------------------
+SQL is a database language that we can use to interact with databases.
+Models are python objects that we can use to communicate with a database, 
+instead of writing direct sql queries we can interact with the python object.
+Migrations is a technique that allows us to update our database with changes 
+that have occured with our models.
+
+Data is going to be stored inside a table. 
+
+Some popular database management systems:
+- MySQL
+- PostgreSQL
+- SQLite
+- ...
+
+Syntax to create a table in sqlite
+CREATE TABLE flights )
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    origin TEXT NOT NULL,
+    destination TEXT NOT NULL,
+    duration INTEGER NOT NULL
+)
+
+Association tables just associates one values from a table to another value in another table.
+Example: 
+Passengers association table 
+person  |   flight
+1           1
+Person with primary id of 1 is on flighth with primary id of 1.
+
+when defnining a sql join statement, the ON clause?? is telling sql how the tables
+that are being joined are related. 
+ex:
+.... ON passengers.flight_id == flight.id;
+
+Indexing, additional data structure to construct that makes quering on a specific col
+much more faster.
+
+CREATE INDEX name_index ON passengers(last);
+^^^ above would be used if you were quering through passengers last time frequently.
+
+Migrations "I have made some changes to the database apply them with this migration"
+
+python3 manage.py makemigrations
+python3 manage.py migrate
+
+to enter the shell and write command that will change the application directly:
+python3 manage.py shell
+
+Airports.objects.filter(city="something")
+Airports.objects.get(city="something")
+
+Instead of using the shell to run the commands such as creating a new item in 
+the database, we can use a web interface django admin.
+
+python3 manage.py createsuperuser 
+
+passenger.flights.add(flight_object_here)
+Passenger.objects.exclude().all()
+
+from django.contrib.auth import authenticate, login, logout
+
+ 
