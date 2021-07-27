@@ -35,3 +35,6 @@ def get_entry(title):
         return f.read().decode("utf-8")
     except FileNotFoundError:
         return None
+
+def contains_characters(title):
+    return [entry for entry in list_entries() if title.lower() in entry.lower()]

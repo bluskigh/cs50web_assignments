@@ -1,5 +1,8 @@
 {% extends 'encyclopedia/layout.html' %}
 {% block title %}{{entry_title}} | WiKi{% endblock %}
 {% block body %}
-{{information}}
+<a href="/wiki/edit/{{entry_title}}">Edit</a>
+<br>
+<!--need to tell the django templating engine that the text is safe-->
+{{information|safe}}
 {% endblock %}
