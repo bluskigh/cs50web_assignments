@@ -1,8 +1,27 @@
 {% extends 'auctions/layout.html' %}
 {% block title %}Viewing '{{ listing.title }}{% endblock %}
 {% block body %}
-{{ listing.title }}
-{{ listing.description }}
-{{ listing.starting_bid }}
-{{ listing.image }}
+<h1>Listing: {{ listing.title }}</h1>
+{% if request.user.id != listing.owner.id %}
+<!--if alreayd in watchlist then display option to remove from watchlist-->
+<button>Add to watchlist</button> 
+{% endif %}
+{% if listing.image %}
+<img src="{{ listing.image }}" height="350px" width="auto">
+{% endif %}
+<p>{{ listing.description }}</p>
+<h3><strong>${{ listing.starting_bid }}</strong></h3>
+<!--display the total bids, and if the current bid is by the current user-->
+{{ bids }}
+<form action="{% url 'post_bid' listing.id %}" method="POST">
+    {% csrf_token %}
+    <!--todo make min no less than the current bid (which is the higest bid-->
+    <input type="number" placeholder="Bid" min="0" name="amount" required> 
+    <button type="submit">Place Bid</button>
+</form>
+<h4>Details: </h4>
+<ul>
+    <li>Listed by: <a href="{% url 'user_view' listing.owner.id %}">{{ listing.owner.username }}</a></li>
+    <li>Category: No category</li>
+</ul>
 {% endblock %}

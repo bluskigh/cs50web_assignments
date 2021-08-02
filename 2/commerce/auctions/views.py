@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.core.validators import MinValueValidator
 from django import forms
 
-from .models import User, Listing
+from .models import User, Listing, Bid
 
 
 class ListingForm(forms.Form):
@@ -27,8 +27,8 @@ def view_listing(request, listing_id):
     # TODO show error saying listing was not found if None
     listing = Listing.objects.get(id=listing_id)
     if listing is not None:
-        return render(request, 'auctions/view_listing.html', {'listing': 
-                                                                listing})
+        return render(request, 'auctions/view_listing.html', 
+                {'listing': listing, 'bids': listing.bids.all() })
     # return to home page showing error.
     return HttpRedirectResponse(reverse('index'))
 
@@ -42,10 +42,32 @@ def add_listing(request):
             d = form.cleaned_data.get("description")
             b = form.cleaned_data.get("starting_bid")
             i = form.cleaned_data.get("image")
-            Listing.objects.create(title=t, description=d, starting_bid=b, image=i)
+            Listing.objects.create(title=t, description=d, starting_bid=b, 
+                    image=i, owner=request.user)
             return HttpResponseRedirect(reverse("index"))
     return render(request, 'auctions/add_listing.html', {
         'form': ListingForm()})
+
+
+def post_bid(request, listing_id):
+    listing = Listing.objects.get(id=listing_id)
+    if listing is None:
+        # show error
+        return HttpResponseRedirect(reverse("index"))
+    amount = request.POST.get("amount")
+    # assuming the field constraints are all correct, and the bid is larger than
+    # the largest we will add to bids
+    temp_bid_object = Bid.objects.create(user=request.user, amount=amount)
+    # add bid to the listings bids association table.
+    listing.bids.add(temp_bid_object)
+    return HttpResponseRedirect(reverse("view_listing", kwargs={
+        "listing_id": listing_id}))
+
+
+def user_view(request, user_id):
+    user = User.objects.get(id=user_id)
+    return render(request, "auctions/view_user.html", {'found': user is not None, 
+        'username': user.username, 'listings': user.listings.all()})
 
 
 def login_view(request):

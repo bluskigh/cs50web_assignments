@@ -1,0 +1,14 @@
+{% for listing in listings %}
+<div class="listing">
+    {% if listing.image %}
+    <img src="{{ listing.image }}" height="250px" width="250px">
+    {% endif %}
+    <div>
+        <h2><a href="{% url 'view_listing' listing.id %}">{{ listing.title }}</a></h2>
+        <p><strong>Price:</strong> {{ listing.starting_bid }}</p>
+        <p>{{ listing.description }}</p>
+        <abbr>Date when created: </abbr>
+    </div>
+</div>
+{% endfor %}
+

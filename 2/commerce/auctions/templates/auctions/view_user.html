@@ -1,0 +1,12 @@
+{% extends 'auctions/layout.html' %}
+{% block title %}{% if found %}Viewing: {{ username }}{% else %}404: Error
+{% endif %}{% endblock %}
+{% block body %}
+{% if found %}
+<h1>{{ username }}'s page.</h1>
+<h2>Their listings: </h2>
+{% include 'auctions/listing_include.html' %}
+{% else %}
+That user does not exist anymore, or never existed...
+{% endif %}
+{% endblock %}

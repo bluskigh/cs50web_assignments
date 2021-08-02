@@ -6,9 +6,16 @@ class User(AbstractUser):
     pass
 
 
+class Bid(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bids")
+    amount = models.FloatField()
+
+
 class Listing(models.Model):
     title = models.CharField(max_length=64)
     description = models.CharField(max_length=120)
-    starting_bid = models.FloatField()
     image = models.CharField(max_length=240)
     closed = models.BooleanField(default=False)
+    bids = models.ManyToManyField(Bid, blank=True, related_name="listing")
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, 
+            related_name='listings')
