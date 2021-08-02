@@ -32,6 +32,6 @@
 <h4>Details: </h4>
 <ul>
     <li>Listed by: <a href="{% url 'user_view' listing.owner.id %}">{{ listing.owner.username }}</a></li>
-    <li>Category: No category</li>
+    <li>Categories: {% if categories|length > 0 %}{% for category in categories %}{{ category.title }},{% endfor %}{% else %}No Categories.{% endif %}</li>
 </ul>
 {% endblock %}

@@ -7,7 +7,7 @@ from django.core.validators import MinValueValidator
 from django.contrib.auth.decorators import login_required
 from django import forms
 
-from .models import User, Listing, Bid
+from .models import User, Listing, Bid, Categories
 
 class ListingForm(forms.Form):
     title = forms.CharField(max_length=64, label="Title")
@@ -15,7 +15,9 @@ class ListingForm(forms.Form):
             label="Description")
     starting_bid = forms.FloatField(localize=False, validators=[
         MinValueValidator(0.9)], label="Staring Bid")
-    image = forms.CharField(label="Image Link", max_length=240)
+    image = forms.CharField(label="Image Link", max_length=240, required=False)
+    options = tuple([(category.id, category.title) for category in Categories.objects.all()])
+    categories = forms.MultipleChoiceField(choices=options)
 
 
 def index(request):
@@ -56,7 +58,8 @@ def view_listing(request, listing_id):
                 {'listing': listing, 'bids': listing.bids.all(), 
                     'highest_bid': highest_bid, 
                     'watch_list_length': len(request.user.watch_list.all()),
-                    'watching': listing in request.user.watch_list.all()})
+                    'watching': listing in request.user.watch_list.all(),
+                    'categories': listing.categories.all()})
     # return to home page showing error.
     return HttpRedirectResponse(reverse('index'))
 
@@ -64,21 +67,27 @@ def view_listing(request, listing_id):
 def add_listing(request):
     if request.method == "POST":
         form = ListingForm(request.POST)
+        print(request.POST.get('categories'))
         if form.is_valid():
             # add a new listing
             t = form.cleaned_data.get("title")
             d = form.cleaned_data.get("description")
-            b = form.cleaned_data.get("starting_bid")
+            a = form.cleaned_data.get("starting_bid")
             i = form.cleaned_data.get("image")
+            c = form.cleaned_data.get("categories")
             temp_bid = Bid.objects.create(user=request.user, amount=a)
-            listing = Listing.objects.create(title=t, description=d, starting_bid=b, 
-                    image=i, owner=request.user)
+            listing = Listing.objects.create(title=t, description=d, image=i, 
+                    owner=request.user)
             # adding the starting bid to the bids
             listing.bids.add(temp_bid)
+            # add category to the current listing categories
+            for category_id in c:
+                category = Categories.objects.get(id=category_id)
+                listing.categories.add(category)
             return HttpResponseRedirect(reverse("index"))
     return render(request, 'auctions/add_listing.html', {
         'form': ListingForm(), 'watch_list_length': 
-        len(request.user.watch_list.all())})
+        len(request.user.watch_list.all()), 'categories': Categories.objects.all()})
 
 
 def post_bid(request, listing_id):

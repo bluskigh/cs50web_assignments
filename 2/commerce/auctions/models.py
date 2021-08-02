@@ -11,6 +11,10 @@ class Bid(models.Model):
     amount = models.FloatField()
 
 
+class Categories(models.Model):
+    title = models.CharField(max_length=64)
+
+
 class Listing(models.Model):
     title = models.CharField(max_length=64)
     description = models.CharField(max_length=120)
@@ -18,5 +22,7 @@ class Listing(models.Model):
     closed = models.BooleanField(default=False)
     watching = models.ManyToManyField(User, blank=True, related_name="watch_list")
     bids = models.ManyToManyField(Bid, blank=True, related_name="listing")
+    categories = models.ManyToManyField(Categories, blank=True, 
+            related_name="listing")
     owner = models.ForeignKey(User, on_delete=models.CASCADE, 
             related_name="listings")
