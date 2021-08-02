@@ -10,13 +10,12 @@
 <img src="{{ listing.image }}" height="350px" width="auto">
 {% endif %}
 <p>{{ listing.description }}</p>
-<h3><strong>${{ listing.starting_bid }}</strong></h3>
+<h3><strong>${{ highest_bid.amount }}</strong></h3>
+<p>{{ bids|length }} bid(s). {% if highest_bid.user.id == request.user.id %}You're the current user with the highest bid.{% endif %}</p>
 <!--display the total bids, and if the current bid is by the current user-->
-{{ bids }}
 <form action="{% url 'post_bid' listing.id %}" method="POST">
     {% csrf_token %}
-    <!--todo make min no less than the current bid (which is the higest bid-->
-    <input type="number" placeholder="Bid" min="0" name="amount" required> 
+    <input type="number" placeholder="Bid" min="{{ highest_bid.amount|add:1 }}" step=".01" name="amount" required> 
     <button type="submit">Place Bid</button>
 </form>
 <h4>Details: </h4>

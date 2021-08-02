@@ -7,7 +7,6 @@
         <h2><a href="{% url 'view_listing' listing.id %}">{{ listing.title }}</a></h2>
         <p><strong>Price:</strong> {{ listing.starting_bid }}</p>
         <p>{{ listing.description }}</p>
-        <abbr>Date when created: </abbr>
     </div>
 </div>
 {% endfor %}

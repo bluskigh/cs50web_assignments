@@ -1,13 +1,13 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render 
+from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.core.validators import MinValueValidator
+from django.contrib.auth.decorators import login_required
 from django import forms
 
 from .models import User, Listing, Bid
-
 
 class ListingForm(forms.Form):
     title = forms.CharField(max_length=64, label="Title")
@@ -19,16 +19,24 @@ class ListingForm(forms.Form):
 
 
 def index(request):
+    print(request.user.watch_list.all())
     return render(request, "auctions/index.html", 
             {'listings': Listing.objects.filter(closed= False).all()})
 
 
+@login_required(login_url='login')
 def view_listing(request, listing_id):
     # TODO show error saying listing was not found if None
     listing = Listing.objects.get(id=listing_id)
     if listing is not None:
+        bids = listing.bids.all()
+        highest_bid = bids[0] 
+        for bid in bids:
+            if bid.amount > highest_bid.amount:
+                highest_bid = bid
         return render(request, 'auctions/view_listing.html', 
-                {'listing': listing, 'bids': listing.bids.all() })
+                {'listing': listing, 'bids': listing.bids.all(), 
+                    'highest_bid': highest_bid})
     # return to home page showing error.
     return HttpRedirectResponse(reverse('index'))
 
@@ -42,8 +50,11 @@ def add_listing(request):
             d = form.cleaned_data.get("description")
             b = form.cleaned_data.get("starting_bid")
             i = form.cleaned_data.get("image")
-            Listing.objects.create(title=t, description=d, starting_bid=b, 
+            temp_bid = Bid.objects.create(user=request.user, amount=a)
+            listing = Listing.objects.create(title=t, description=d, starting_bid=b, 
                     image=i, owner=request.user)
+            # adding the starting bid to the bids
+            listing.bids.add(temp_bid)
             return HttpResponseRedirect(reverse("index"))
     return render(request, 'auctions/add_listing.html', {
         'form': ListingForm()})

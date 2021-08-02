@@ -16,6 +16,7 @@ class Listing(models.Model):
     description = models.CharField(max_length=120)
     image = models.CharField(max_length=240)
     closed = models.BooleanField(default=False)
+    watching = models.ManyToManyField(User, blank=True, related_name="watch_list")
     bids = models.ManyToManyField(Bid, blank=True, related_name="listing")
     owner = models.ForeignKey(User, on_delete=models.CASCADE, 
-            related_name='listings')
+            related_name="listings")
