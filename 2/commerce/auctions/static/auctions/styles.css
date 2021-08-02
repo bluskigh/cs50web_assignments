@@ -21,3 +21,14 @@ textarea {
 .listing img {
     margin-right: 3em;
 }
+.button {
+    background: gray;
+    color: white;
+    padding: .3em;
+    min-width: .5em;
+    margin-left: .5em;
+}
+.nav {
+    display: flex;
+    align-items: center;
+}

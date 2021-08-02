@@ -1,6 +1,17 @@
 {% extends 'auctions/layout.html' %}
 {% block title %}Viewing '{{ listing.title }}{% endblock %}
 {% block body %}
+{% if watching %}
+<form action="{% url 'remove_watching' listing.id %}" method="POST">
+    {% csrf_token %}
+    <button class="button" type="submit">Remove from watch list</button>
+</form>
+{% else %}
+<form action="{% url 'add_watching' listing.id %}" method="POST">
+    {% csrf_token %}
+    <button class="button" type="submit">Add to watch list</button>
+</form>
+{% endif %}
 <h1>Listing: {{ listing.title }}</h1>
 {% if request.user.id != listing.owner.id %}
 <!--if alreayd in watchlist then display option to remove from watchlist-->

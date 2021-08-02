@@ -25,6 +25,9 @@
                     <a class="nav-link" href="{% url 'add_listing' %}">Create Listing</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" style="display: flex; align-items: center;" href="{% url 'watching' %}">Watch List<div class="button">{{ watch_list_length }}</div></a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
                 </li>
             {% else %}

@@ -19,10 +19,28 @@ class ListingForm(forms.Form):
 
 
 def index(request):
-    print(request.user.watch_list.all())
     return render(request, "auctions/index.html", 
-            {'listings': Listing.objects.filter(closed= False).all()})
+            {'listings': Listing.objects.filter(closed= False).all(),
+                'watch_list_length': len(request.user.watch_list.all())})
 
+
+def watching(request):
+    return render(request, 'auctions/view_watching.html', {'listings': 
+        request.user.watch_list.all(), 'watch_list_length': 
+        len(request.user.watch_list.all())})
+
+
+def add_watching(request, listing_id):
+    if request.method == "POST":
+        listing = Listing.objects.get(id=listing_id)
+        listing.watching.add(request.user)
+        return HttpResponseRedirect(reverse("view_listing", kwargs={"listing_id": listing_id}))
+
+def remove_watching(request, listing_id):
+    if request.method == "POST":
+        listing = Listing.objects.get(id=listing_id)
+        listing.watching.remove(request.user)
+        return HttpResponseRedirect(reverse("view_listing", kwargs={"listing_id": listing_id}))
 
 @login_required(login_url='login')
 def view_listing(request, listing_id):
@@ -36,7 +54,9 @@ def view_listing(request, listing_id):
                 highest_bid = bid
         return render(request, 'auctions/view_listing.html', 
                 {'listing': listing, 'bids': listing.bids.all(), 
-                    'highest_bid': highest_bid})
+                    'highest_bid': highest_bid, 
+                    'watch_list_length': len(request.user.watch_list.all()),
+                    'watching': listing in request.user.watch_list.all()})
     # return to home page showing error.
     return HttpRedirectResponse(reverse('index'))
 
@@ -57,7 +77,8 @@ def add_listing(request):
             listing.bids.add(temp_bid)
             return HttpResponseRedirect(reverse("index"))
     return render(request, 'auctions/add_listing.html', {
-        'form': ListingForm()})
+        'form': ListingForm(), 'watch_list_length': 
+        len(request.user.watch_list.all())})
 
 
 def post_bid(request, listing_id):
@@ -78,7 +99,8 @@ def post_bid(request, listing_id):
 def user_view(request, user_id):
     user = User.objects.get(id=user_id)
     return render(request, "auctions/view_user.html", {'found': user is not None, 
-        'username': user.username, 'listings': user.listings.all()})
+        'username': user.username, 'listings': user.listings.all(),
+        'watch_list_length': len(request.user.watch_list.all())})
 
 
 def login_view(request):
