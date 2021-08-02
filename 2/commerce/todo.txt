@@ -33,3 +33,7 @@ a page with results of listing under thus category.
 
 Django admin interface (look at website for these specifications)
 
+
+Add myself:
+add date created, and add when it ends, so on the active listings page show
+when it was created and how much time left until automaically closed.

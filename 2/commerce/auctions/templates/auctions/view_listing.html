@@ -1,0 +1,8 @@
+{% extends 'auctions/layout.html' %}
+{% block title %}Viewing '{{ listing.title }}{% endblock %}
+{% block body %}
+{{ listing.title }}
+{{ listing.description }}
+{{ listing.starting_bid }}
+{{ listing.image }}
+{% endblock %}
