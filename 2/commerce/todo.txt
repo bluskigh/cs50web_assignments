@@ -1,0 +1,35 @@
+1. POST auction listings
+2. POST bids on listings
+3. POST comments on listings
+4. POST listings to watchlist
+
+Models todos:
+1. auction listings
+2. bids
+3. comments
+
+Creating a new listing is simple, provide a form that contains an input for 
+the title, text description, starting bid, and optional image.
+
+Active listing page is relatively simple, its the default route and should
+display all currently active listings. This information should be displayed:
+title, description, current price, and photo(if exists)
+
+Listing page is just like an page that shows specific detail about a certain 
+listing. If user is signed in then the following can be done: 
+dislay option to add to watchlist, if item is already in watchlist user should 
+be able to remove it, user can bid on the item (must be as large as starting bid, 
+and greater than any other bids, otherwise if criteria not met display error),
+if user is owner then ability to close the auction showed be displayed(highest 
+bid the winner, and listing no longer active). Following is for users who do
+not own the listing: on closed listing page, and user won the auction page
+should say so, comments can be added (listing page should show those comments). 
+
+Watchlist page should display all the listings that the user has saved, clicking
+on them should redirect user to the appropriate listing page.
+
+Category page should display all categories, clicking on a category should display
+a page with results of listing under thus category.
+
+Django admin interface (look at website for these specifications)
+

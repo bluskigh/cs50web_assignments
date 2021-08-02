@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!--important meta tag where initial-scale=1-->
+        <title>Home</title>
+        <style>
+        html,body, h1 {
+            margin: 0;
+            padding: 0;
+        }
+        html, body {
+            background: gray;
+            color: black;
+            height: 100vh;
+            width: 100%;
+        }
+        ul {
+            display: flex;
+            flex-direction: column;
+        }
+        main {
+            width: 50%;
+            margin: 0 auto;
+            /*not going to center it vertically, and no background therefore using
+              margin 0 auto trick*/
+        }
+        .hidden {
+            display: none;
+            position: absolute;
+            user-select: none;
+            z-index: -1;
+        }
+        </style>
+    </head>
+    <body>
+        <main>
+            <h1>Todo List</h1>
+            <form action="todos/" method="POST">
+                {% csrf_token %}
+                <div>
+                    <!--TODO: find what the id of the form input is after rendered-->
+                    <label for="title">Title</label>
+                    {{form.title}}
+                </div>
+                <div>
+                    <label for="description">Description: </label>
+                    {{form.description}}
+                </div>
+                <button type="submit">Add</button>
+            </form>
+            <ul>
+                {% if todos|length > 0 %}
+                {% for todo in todos %}
+                <li class="todo">{{todo.title}}<br>{{todo.description}}<form action="delete_todo/" method="POST">{% csrf_token %}<input name='id' value='{{todo.id}}' class="hidden"><button type="submit">X</button></form></li>
+                {% endfor %}
+                {% else %}
+                <strong>You have no todos</strong>
+                {% endif %}
+            </ul>
+        </main>
+    </body>
+</html>
