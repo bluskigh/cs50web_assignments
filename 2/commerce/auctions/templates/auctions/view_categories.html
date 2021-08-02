@@ -1,0 +1,13 @@
+{% extends 'auctions/layout.html' %}
+{% block title %}Categories{% endblock %}
+{% block body %}
+{% if categories|length > 0 %}
+{% for category in categories %}
+<ul>
+    <li><a href="/?category={{ category.id }}">{{ category.title }}</a></li>
+</ul>
+{% endfor %}
+{% else %}
+<strong>No Categories, admins need to add some.</strong>
+{% endif %}
+{% endblock %}

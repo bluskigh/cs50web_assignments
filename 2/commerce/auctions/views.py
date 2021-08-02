@@ -21,28 +21,40 @@ class ListingForm(forms.Form):
 
 
 def index(request):
+    category = request.GET.get("category")
+    listings = Listing.objects.filter(closed=False).all()
+
+    # filtering by category
+    if category is not None:
+        listings = [listing for listing in listings if listing.categories.filter(id=category).exists()]
+
     return render(request, "auctions/index.html", 
-            {'listings': Listing.objects.filter(closed= False).all(),
+            {'listings': listings,
                 'watch_list_length': len(request.user.watch_list.all())})
 
 
+@login_required
 def watching(request):
     return render(request, 'auctions/view_watching.html', {'listings': 
         request.user.watch_list.all(), 'watch_list_length': 
         len(request.user.watch_list.all())})
 
 
+@login_required
 def add_watching(request, listing_id):
     if request.method == "POST":
         listing = Listing.objects.get(id=listing_id)
         listing.watching.add(request.user)
         return HttpResponseRedirect(reverse("view_listing", kwargs={"listing_id": listing_id}))
 
+
+@login_required
 def remove_watching(request, listing_id):
     if request.method == "POST":
         listing = Listing.objects.get(id=listing_id)
         listing.watching.remove(request.user)
         return HttpResponseRedirect(reverse("view_listing", kwargs={"listing_id": listing_id}))
+
 
 @login_required(login_url='login')
 def view_listing(request, listing_id):
@@ -64,6 +76,7 @@ def view_listing(request, listing_id):
     return HttpRedirectResponse(reverse('index'))
 
 
+@login_required
 def add_listing(request):
     if request.method == "POST":
         form = ListingForm(request.POST)
@@ -90,6 +103,7 @@ def add_listing(request):
         len(request.user.watch_list.all()), 'categories': Categories.objects.all()})
 
 
+@login_required
 def post_bid(request, listing_id):
     listing = Listing.objects.get(id=listing_id)
     if listing is None:
@@ -105,6 +119,13 @@ def post_bid(request, listing_id):
         "listing_id": listing_id}))
 
 
+@login_required
+def view_categories(request):
+    return render(request, 'auctions/view_categories.html', {'categories': 
+        Categories.objects.all()})
+
+
+@login_required
 def user_view(request, user_id):
     user = User.objects.get(id=user_id)
     return render(request, "auctions/view_user.html", {'found': user is not None, 
