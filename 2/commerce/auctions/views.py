@@ -20,6 +20,10 @@ class ListingForm(forms.Form):
     categories = forms.MultipleChoiceField(choices=options)
 
 
+class CommentForm(forms.Form):
+    comment = forms.CharField(max_length=120, widget=forms.Textarea(attrs={"rows": 1, "cols": "100%"}))
+
+
 def index(request):
     category = request.GET.get("category")
     listings = Listing.objects.filter(closed=False).all()
@@ -90,7 +94,8 @@ def view_listing(request, listing_id):
                     'watch_list_length': len(request.user.watch_list.all()),
                     'watching': listing in request.user.watch_list.all(),
                     'categories': listing.categories.all(), 
-                    'comments': listing.comments.all()})
+                    'comments': listing.comments.all(),
+                    'form': CommentForm()})
     # return to home page showing error.
     return HttpRedirectResponse(reverse('index'))
 
@@ -145,6 +150,18 @@ def post_bid(request, listing_id):
     return HttpResponseRedirect(reverse("view_listing", kwargs={
         "listing_id": listing_id}))
 
+
+@login_required
+def add_comment(request, listing_id):
+    listing = Listing.objects.get(id=listing_id)
+    if listing is None:
+        # show errro
+        return HttpResponseRedirect(reverse("index"))
+    form = CommentForm(request.POST)
+    if form.is_valid():
+        comment = form.cleaned_data.get("comment")
+        temp = Comment.objects.create(user=request.user, listing=listing, comment=comment)
+        return HttpResponseRedirect(reverse("view_listing", kwargs={"listing_id": listing_id}))
 
 @login_required
 def view_categories(request):

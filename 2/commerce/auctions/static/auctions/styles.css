@@ -1,10 +1,6 @@
 body {
     padding: 10px;
 }
-textarea {
-    height: 10vh;
-    width: 100%;
-}
 .listing-section {
     display: flex;
     flex-direction: column;
@@ -32,12 +28,12 @@ textarea {
     display: flex;
     align-items: center;
 }
-ul {
+.nav {
     display: flex;
     align-items: center;
     justify-content: flex-start;
 }
-ul li {
+.nav li {
     list-style-type: none;
     margin: 0 .5em;
 }
@@ -53,3 +49,10 @@ a:hover {
     color: red;
     opacity: .5;
 }
+.comments {
+    border-top: 1px solid black;
+}
+.comments textarea {
+    min-height: 1em;
+}
+

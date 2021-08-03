@@ -44,14 +44,22 @@
     <li>Categories: {% if categories|length > 0 %}{% for category in categories %}{{ category.title }},{% endfor %}{% else %}No Categories.{% endif %}</li>
 </ul>
 <section class="comments">
+    <h4>Comments</h4>
+    <form action="{% url 'add_comment' listing.id %}" method="POST">
+        {% csrf_token %}
+        <div>
+            {{ form.comment }}
+        </div>
+        <button type="submit">Add Comment</button>
+    </form>
     {% if comments|length > 0 %}
     <ul>
     {% for comment in comments %}
-    <li>{{ comment.comment }}</li>
+    <li><strong>{{ comment.user.username }}</strong> : {{ comment.comment }}</li>
     {% endfor %}
     {% else %}
     <p>There are no comments</p>
-    {% endfor %}
+    {% endif %}
 </section>
 {% if listing.owner.id == request.user.id %}
 <form action="{% url 'close_listing' listing.id %}" method="POST">
