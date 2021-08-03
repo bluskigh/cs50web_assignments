@@ -1,56 +1,84 @@
 {% extends 'auctions/layout.html' %}
 {% block title %}Viewing '{{ listing.title }}{% endblock %}
 {% block body %}
-{% if listing.owner.id != request.user.id %}
+{% if listing.owner.id == request.user.id %}
 {% if listing.closed %}
+{% else %}
+<form action="{% url 'close_listing' listing.id %}" method="POST">
+    {% csrf_token %}
+    <button type="submit" class="danger">Close bid.</button>
+</form>
+{% endif %}
+{% endif %}
+
+<!-- if the current user is not the owner of the listing currently being viewed -->
+{% if listing.owner.id != request.user.id %}
+<!-- and if the listing is closed -->
+{% if listing.closed %}
+<!-- and if winner of the bid is the current user viewing the page -->
 {% if highest_bid.user.id == request.user.id %}
+<!-- display that the user was won the bid -->
 <p>You won the bid for this listing. Now pay up!</p>
 {% else %}
-<p>You did <strong>NOT</strong> win the bid for this listing.</p>
+<!-- else if the user is did not win the bid of the closed listing -->
+<p>You did <strong>NOT</strong> win the bid for this listing. (listing closed)</p>
+<!-- end of checking if the user won the closed listing -->
 {% endif %}
-{% endif %}
+{% else %}
+<!-- end of checking if the listing is closed -->
+<!-- and if the current is user is watching the listing -->
 {% if watching %}
+<!-- show code to remove form watching -->
 <form action="{% url 'remove_watching' listing.id %}" method="POST">
     {% csrf_token %}
     <button class="button" type="submit">Remove from watch list</button>
 </form>
+<!-- else the user is not watching the current listing show code to add to watching list -->
 {% else %}
 <form action="{% url 'add_watching' listing.id %}" method="POST">
     {% csrf_token %}
     <button class="button" type="submit">Add to watch list</button>
 </form>
+<!-- end of watching checking statement -->
 {% endif %}
+
 {% endif %}
-<h1>Listing: {{ listing.title }}</h1>
-{% if request.user.id != listing.owner.id %}
-<!--if alreayd in watchlist then display option to remove from watchlist-->
-<button>Add to watchlist</button> 
+<!-- end of checking if the user is not the current listing owner -->
 {% endif %}
-{% if listing.image %}
-<img src="{{ listing.image }}" height="350px" width="auto">
-{% endif %}
-<p>{{ listing.description }}</p>
-<h3>{% if bids_length == 0 %}Starting bid price: {% else %}Current bid price: {% endif %}<strong>${{ highest_bid.amount }}</strong></h3>
-<p>{{ bids_length }} bid(s). {% if highest_bid.user.id == request.user.id and highest_bid.user.id != listing.owner.id %}You're the current user with the highest bid.{% endif %}</p>
-<!--display the total bids, and if the current bid is by the current user-->
-<form action="{% url 'post_bid' listing.id %}" method="POST">
-    {% csrf_token %}
-    <input type="number" placeholder="Bid" min="{{ highest_bid.amount|add:1 }}" step=".01" name="amount" required value="{{ highest_bid.amount|add:1 }}"> 
-    <button type="submit">Place Bid</button>
-</form>
-<h4>Details: </h4>
-<ul>
-    <li>Listed by: <a href="{% url 'user_view' listing.owner.id %}">{{ listing.owner.username }}</a></li>
-    <li>Categories: {% if categories|length > 0 %}{% for category in categories %}{{ category.title }},{% endfor %}{% else %}No Categories.{% endif %}</li>
-</ul>
+
+<section class="{% if listing.image|length == 0 %}no-listing-image{% endif %} listing-view" >
+    <section class="" style="flex-direction: column; align-items: center;">
+        <div>
+            <h1 style="font-size: 1.5em;">Listing: {{ listing.title }}</h1>
+            {% if listing.image %}
+            <img src="{{ listing.image }}" stlye="box-shadow: 0em 1em 1em black" height="350px" width="auto">
+            {% endif %}
+        </div>
+        <div style="display: flex; flex-direction: column; justify-content: space-around; height: 80%;">
+            <p class="listing-description" style="margin: .5em 0;">{{ listing.description }}</p>
+            <h4>Details: </h4>
+            <ul style="margin: .5em 0;">
+                <li>Listed by: <a href="{% url 'user_view' listing.owner.id %}">{{ listing.owner.username }}</a></li>
+                <li>Categories: {% if categories|length > 0 %}{% for category in categories %}{{ category.title }},{% endfor %}{% else %}No Categories.{% endif %}</li>
+            </ul>
+            <p style="margin-top: 1em;">{% if bids_length == 0 %}Starting bid price: {% else %}Current bid price: {% endif %}<strong>${{ highest_bid.amount }}</strong> <sub>{{ bids_length }} bid(s). {% if highest_bid.user.id == request.user.id and highest_bid.user.id != listing.owner.id %}You're the current user with the highest bid.{% endif %}</sub></p>
+            <form action="{% url 'post_bid' listing.id %}" method="POST">
+                {% csrf_token %}
+                <input type="number" placeholder="Bid" min="{{ highest_bid.amount|add:1 }}" step=".01" name="amount" required value="{{ highest_bid.amount|add:1 }}"> 
+                <button type="submit">Place Bid</button>
+            </form>
+        </div>
+    </section>
+</section>
+<hr>
 <section class="comments">
-    <h4>Comments</h4>
-    <form action="{% url 'add_comment' listing.id %}" method="POST">
+    <h2 style="margin-bottom: .5em;">Comments</h2>
+    <form action="{% url 'add_comment' listing.id %}" method="POST" style="display: flex; align-items: flex-end; justify-content: center; margin-bottom: .5em;">
         {% csrf_token %}
         <div>
             {{ form.comment }}
         </div>
-        <button type="submit">Add Comment</button>
+        <button type="submit" style="margin-left: .5em;">Add Comment</button>
     </form>
     {% if comments|length > 0 %}
     <ul>
@@ -61,12 +89,6 @@
     <p>There are no comments</p>
     {% endif %}
 </section>
-{% if listing.owner.id == request.user.id %}
-<form action="{% url 'close_listing' listing.id %}" method="POST">
-    {% csrf_token %}
-    <button type="submit">Close</button>
-</form>
-{% endif %}
 {% if listing.closed %}
     <script>
         document.querySelectorAll('input').forEach(item => {
@@ -75,6 +97,7 @@
         document.querySelectorAll('button').forEach(item => {
             item.disabled = true;
         })
+        document.querySelector('textarea').disabled = true;
         document.querySelectorAll('form').forEach(item => {
             item.addEventListener('submit', function(e) {
                 e.preventDefault();

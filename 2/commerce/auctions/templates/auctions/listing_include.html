@@ -1,4 +1,5 @@
 {% load app_filters %}
+{% if listings|length > 0 %}
 <section class="listing-container">
     <section class="row">
     </section>
@@ -27,6 +28,9 @@
     </div>
     {% endfor %}
 </section>
+{% else %}
+<p>There are no listings to be displayed.</p>
+{% endif %}
 {% block scripts %}
 <script>
     var first, second, third;

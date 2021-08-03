@@ -6,8 +6,16 @@
 <link rel="stylesheet" type="text/css" href="{% static 'auctions/index.css' %}">
 {% endblock %}
 
+{% load app_filters %}
+
 {% block body %}
-    <h2>Active Listings</h2>
+    {% with category=request.GET|contains_query %}
+    {% if category %}
+    <h1>Active Listings with category: <strong>{{ category.title }}</strong></h1>
+    {% else %}
+    <h1>Active Listings</h1>
+    {% endif %}
+    {% endwith %}
     <section class="listings-section">
     {% if listings|length > 0 %}
     {% include 'auctions/listing_include.html' %}

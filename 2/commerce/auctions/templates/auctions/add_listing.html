@@ -1,4 +1,8 @@
 {% extends 'auctions/layout.html' %}
+{% load static %}
+{% block styles %}
+<link rel="stylesheet" type="text/css" href="{% static 'auctions/add_listing.css' %}">
+{% endblock %}
 {% block title %}Create Listing{% endblock %}
 {% block body %}
 <form action="{% url 'add_listing' %}" method="POST">
@@ -25,4 +29,12 @@
     </div>
     <button type="submit">Create</button>
 </form>
+<script>
+    const width = document.querySelector('textarea').clientWidth-4;
+    const inputs = document.querySelectorAll('input');
+    inputs.forEach(item => {
+        item.style.width = width + 'px';
+    })
+    document.querySelector('select').style.width = (width+8) + 'px';
+</script>
 {% endblock %}

@@ -1,7 +1,7 @@
 html, body {
     margin: 0;
     padding: 0;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Source Sans Pro', sans-serif;
 }
 body {
     height: 100vh;
@@ -9,6 +9,9 @@ body {
 h1, h2, h3, h4, h5, h6, p, ul {
     margin-top: 0;
     margin-bottom: 0;
+}
+h1 {
+    margin-bottom: 1em;
 }
 nav {
     height: 10%;
@@ -64,6 +67,8 @@ footer p {
     position: absoltue;
     top: 50%;
     transform: translateY(50%);
+    padding-left: 1em;
+    box-sizing: border-box;
 }
 
 
@@ -176,13 +181,40 @@ footer p {
     justify-content: center;
     z-index: 2;
 }
-.comments {
-    border-top: 1px solid black;
-}
 .comments textarea {
     min-height: 1em;
 }
 
 button:hover {
     cursor: pointer;
+}
+
+.listing-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+.listing-view div {
+    text-align: center;
+}
+.listing-view a {
+    color: white;
+}
+hr {
+    color: white;
+    width: 50%;
+    margin: 1.5em auto;
+}
+.danger {
+    background: darkred;
+    color: red;
+    border: none;
+    padding: .5em;
+    border-radius: .5em;
+}
+
+a {
+    color: black;
 }
