@@ -1,16 +1,60 @@
-{% for listing in listings %}
-<div class="listing {% if listing.closed %}closed{% endif %}">
-    {% if listing.closed %}
-    <button>Closed</button>
-    {% endif %}
-    {% if listing.image %}
-    <img src="{{ listing.image }}" height="250px" width="250px">
-    {% endif %}
-    <div>
-        <h2><a href="{% url 'view_listing' listing.id %}">{{ listing.title }}</a></h2>
-        <p><strong>Price:</strong> {{ listing.starting_bid }}</p>
-        <p>{{ listing.description }}</p>
+{% load app_filters %}
+<section class="listing-container">
+    <section class="row"></section>
+    <section class="row"></section>
+    <section class="row"></section>
+    {% for listing in listings %}
+    <div class="listing {% if listing.closed %}closed{% endif %} {% if listing.image|length == 0 %}no-listing-image{% endif %}" data-col-location="{{ forloop.counter|mod_three }}">
+        {% if listing.closed %}
+        <div class="closed-overlay"><h3>CLOSED</h3></div>
+        {% endif %}
+        {% if listing.image %}
+        <img src="{{ listing.image }}" class="listing-image">
+        {% endif %}
+        <div class="listing-information">
+            <h2><a href="{% url 'view_listing' listing.id %}">{{ listing.title }}</a></h2>
+            <p class="listing-description">{{ listing.description }}</p>
+            <p><strong>Price:</strong> {{ listing.starting_bid }}</p>
+        </div>
+        <div class="categories">
+            {% for category in listing.categories.all %}
+            <button>{{ category.title }}</button>
+            {% endfor %}
+        </div>
     </div>
-</div>
-{% endfor %}
+    {% endfor %}
+</section>
+{% block scripts %}
+<script>
+    var first, second, third;
+    [first, second, third] = document.querySelectorAll('.row');
+    const listings = document.querySelectorAll('.listing');
+    if (listings.length == 1) {
+        second.appendChild(listings[0])
+    } else {
+        listings.forEach(item => {
+            const col_location = item.getAttribute("data-col-location");
+            if (col_location == 0) {
+                // first row
+                first.appendChild(item);
+            } else if (col_location == 1) {
+                // second row
+                second.appendChild(item);
+            } else if (col_location == 2) {
+                // third row
+                third.appendChild(item);
+            }
+        })
+    }
+    const closed = document.querySelectorAll('.closed');
+    closed.forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            item.classList.toggle('closed');
+        })
+        item.addEventListener('mouseleave', function() {
+            item.classList.toggle('closed');
+        })
 
+    })
+</script>
+{% endblock %}

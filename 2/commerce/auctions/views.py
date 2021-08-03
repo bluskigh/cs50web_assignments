@@ -51,7 +51,9 @@ def index(request):
 
 
 def listings(request):
-    return render(request, "auctions/listings.html", {"listings": request.user.listings.all()})
+    return render(request, "auctions/listings.html", 
+            {"listings": request.user.listings.all(),
+                "watch_list_length": len(request.user.watch_list.all())})
 
 
 @login_required
@@ -166,7 +168,7 @@ def add_comment(request, listing_id):
 @login_required
 def view_categories(request):
     return render(request, 'auctions/view_categories.html', {'categories': 
-        Categories.objects.all()})
+        Categories.objects.all(), 'watch_list_length': len(request.user.watch_list.all())})
 
 
 @login_required

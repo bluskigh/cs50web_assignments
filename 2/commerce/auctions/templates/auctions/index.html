@@ -1,5 +1,11 @@
 {% extends "auctions/layout.html" %}
 
+{% load static %}
+
+{% block styles %}
+<link rel="stylesheet" type="text/css" href="{% static 'auctions/index.css' %}">
+{% endblock %}
+
 {% block body %}
     <h2>Active Listings</h2>
     <section class="listings-section">

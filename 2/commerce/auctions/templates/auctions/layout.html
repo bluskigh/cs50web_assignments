@@ -4,49 +4,51 @@
 <html lang="en">
     <head>
         <title>{% block title %}Auctions{% endblock %}</title>
-        <!--<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">-->
         <link href="{% static 'auctions/styles.css' %}" rel="stylesheet">
+        {% block styles %}
+        {% endblock %}
     </head>
     <body>
-        <h1>Auctions</h1>
-        <div>
-            {% if user.is_authenticated %}
-                Signed in as <strong>{{ user.username }}</strong>.
-            {% else %}
-                Not signed in.
-            {% endif %}
-        </div>
-        <ul class="nav">
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
-            </li>
-            {% if user.is_authenticated %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'listings' %}">Listings</a>
+        <nav>
+            <h3><strong>Auctions</strong></h3>
+            <ul class="links-container">
+                <li class="nav-item {% if request.path == '/' %}current{% endif %}">
+                    <a href="{% url 'index' %}">Active Listings</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'view_categories' %}">Categories</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'add_listing' %}">Create Listing</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" style="display: flex; align-items: center;" href="{% url 'watching' %}">Watch List<div class="button">{{ watch_list_length }}</div></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
-                </li>
-            {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">Log In</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'register' %}">Register</a>
-                </li>
-            {% endif %}
-        </ul>
-        <hr>
-        {% block body %}
+                {% if user.is_authenticated %}
+                    <li class="nav-item {% if request.path == '/listings' %}current{% endif %}">
+                        <a href="{% url 'listings' %}">Listings</a>
+                    </li>
+                    <li class="nav-item {% if request.path == '/view_categories' %}current{% endif %}">
+                        <a href="{% url 'view_categories' %}">Categories</a>
+                    </li>
+                    <li class="nav-item {% if request.path == '/add_listing' %}current{% endif %}">
+                        <a href="{% url 'add_listing' %}">Create Listing</a>
+                    </li>
+                    <li class="nav-item {% if request.path == '/watching' %}current{% endif %}">
+                        <a style="display: flex; align-items: center;" href="{% url 'watching' %}">Watch List<div class="button">{{ watch_list_length }}</div></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'logout' %}">Log Out</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item {% if request.path == '/login' %}current{% endif %}">
+                        <a href="{% url 'login' %}">Log In</a>
+                    </li>
+                    <li class="nav-item {% if request.path == '/register' %}current{% endif %}">
+                        <a href="{% url 'register' %}">Register</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        <section class="body-container">
+            {% block body %}
+            {% endblock %}
+        </section>
+        <footer>
+            <p>Mario Molinito's CS50w project.</p>
+        </footer>
+        {% block scripts %}
         {% endblock %}
     </body>
 </html>
