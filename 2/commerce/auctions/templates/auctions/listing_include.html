@@ -1,8 +1,11 @@
 {% load app_filters %}
 <section class="listing-container">
-    <section class="row"></section>
-    <section class="row"></section>
-    <section class="row"></section>
+    <section class="row">
+    </section>
+    <section class="row">
+    </section>
+    <section class="row">
+    </section>
     {% for listing in listings %}
     <div class="listing {% if listing.closed %}closed{% endif %} {% if listing.image|length == 0 %}no-listing-image{% endif %}" data-col-location="{{ forloop.counter|mod_three }}">
         {% if listing.closed %}
@@ -28,6 +31,7 @@
 <script>
     var first, second, third;
     [first, second, third] = document.querySelectorAll('.row');
+
     const listings = document.querySelectorAll('.listing');
     if (listings.length == 1) {
         second.appendChild(listings[0])

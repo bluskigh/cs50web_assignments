@@ -114,7 +114,6 @@ def close_listing(request, listing_id):
 def add_listing(request):
     if request.method == "POST":
         form = ListingForm(request.POST)
-        print(request.POST.get('categories'))
         if form.is_valid():
             # add a new listing
             t = form.cleaned_data.get("title")
