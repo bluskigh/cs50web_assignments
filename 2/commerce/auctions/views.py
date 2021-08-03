@@ -7,7 +7,7 @@ from django.core.validators import MinValueValidator
 from django.contrib.auth.decorators import login_required
 from django import forms
 
-from .models import User, Listing, Bid, Categories
+from .models import User, Listing, Bid, Categories, Comment
 
 class ListingForm(forms.Form):
     title = forms.CharField(max_length=64, label="Title")
@@ -23,6 +23,16 @@ class ListingForm(forms.Form):
 def index(request):
     category = request.GET.get("category")
     listings = Listing.objects.filter(closed=False).all()
+
+    """
+    CODE WRITTEN TO DELETE COMMENTS, BUT HAD SOMETHING I LEARNED
+    for listing in listings:
+        comments = listing.comments.all()
+        while len(comments):
+            # using listing.comments.remove() does not work for foreignkeys that do not have null=True, 
+            # becuase an object can not be deleted from a relation if it never had one in the first place
+            listing.comments.filter(id=comments[0].id).delete()
+    """
 
     # filtering by category
     if category is not None:
@@ -79,7 +89,8 @@ def view_listing(request, listing_id):
                     'highest_bid': highest_bid, 
                     'watch_list_length': len(request.user.watch_list.all()),
                     'watching': listing in request.user.watch_list.all(),
-                    'categories': listing.categories.all()})
+                    'categories': listing.categories.all(), 
+                    'comments': listing.comments.all()})
     # return to home page showing error.
     return HttpRedirectResponse(reverse('index'))
 

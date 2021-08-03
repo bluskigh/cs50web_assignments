@@ -5,6 +5,8 @@
 {% if listing.closed %}
 {% if highest_bid.user.id == request.user.id %}
 <p>You won the bid for this listing. Now pay up!</p>
+{% else %}
+<p>You did <strong>NOT</strong> win the bid for this listing.</p>
 {% endif %}
 {% endif %}
 {% if watching %}
@@ -41,10 +43,35 @@
     <li>Listed by: <a href="{% url 'user_view' listing.owner.id %}">{{ listing.owner.username }}</a></li>
     <li>Categories: {% if categories|length > 0 %}{% for category in categories %}{{ category.title }},{% endfor %}{% else %}No Categories.{% endif %}</li>
 </ul>
+<section class="comments">
+    {% if comments|length > 0 %}
+    <ul>
+    {% for comment in comments %}
+    <li>{{ comment.comment }}</li>
+    {% endfor %}
+    {% else %}
+    <p>There are no comments</p>
+    {% endfor %}
+</section>
 {% if listing.owner.id == request.user.id %}
 <form action="{% url 'close_listing' listing.id %}" method="POST">
     {% csrf_token %}
     <button type="submit">Close</button>
 </form>
+{% endif %}
+{% if listing.closed %}
+    <script>
+        document.querySelectorAll('input').forEach(item => {
+            item.disabled = true;
+        })
+        document.querySelectorAll('button').forEach(item => {
+            item.disabled = true;
+        })
+        document.querySelectorAll('form').forEach(item => {
+            item.addEventListener('submit', function(e) {
+                e.preventDefault();
+            })
+        })
+    </script>
 {% endif %}
 {% endblock %}

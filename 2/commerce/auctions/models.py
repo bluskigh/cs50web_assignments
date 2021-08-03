@@ -26,3 +26,11 @@ class Listing(models.Model):
             related_name="listing")
     owner = models.ForeignKey(User, on_delete=models.CASCADE, 
             related_name="listings")
+
+
+class Comment(models.Model):
+    # a user can have many comments, but a comment can only have one user
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
+    comment = models.CharField(max_length=120)
+    # a listing can have many comments, but a comment can only belong to one listing
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="comments")
