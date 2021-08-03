@@ -1,6 +1,12 @@
 {% extends 'auctions/layout.html' %}
 {% block title %}Viewing '{{ listing.title }}{% endblock %}
 {% block body %}
+{% if listing.owner.id != request.user.id %}
+{% if listing.closed %}
+{% if highest_bid.user.id == request.user.id %}
+<p>You won the bid for this listing. Now pay up!</p>
+{% endif %}
+{% endif %}
 {% if watching %}
 <form action="{% url 'remove_watching' listing.id %}" method="POST">
     {% csrf_token %}
@@ -12,6 +18,7 @@
     <button class="button" type="submit">Add to watch list</button>
 </form>
 {% endif %}
+{% endif %}
 <h1>Listing: {{ listing.title }}</h1>
 {% if request.user.id != listing.owner.id %}
 <!--if alreayd in watchlist then display option to remove from watchlist-->
@@ -21,12 +28,12 @@
 <img src="{{ listing.image }}" height="350px" width="auto">
 {% endif %}
 <p>{{ listing.description }}</p>
-<h3><strong>${{ highest_bid.amount }}</strong></h3>
-<p>{{ bids|length }} bid(s). {% if highest_bid.user.id == request.user.id %}You're the current user with the highest bid.{% endif %}</p>
+<h3>{% if bids_length == 0 %}Starting bid price: {% else %}Current bid price: {% endif %}<strong>${{ highest_bid.amount }}</strong></h3>
+<p>{{ bids_length }} bid(s). {% if highest_bid.user.id == request.user.id and highest_bid.user.id != listing.owner.id %}You're the current user with the highest bid.{% endif %}</p>
 <!--display the total bids, and if the current bid is by the current user-->
 <form action="{% url 'post_bid' listing.id %}" method="POST">
     {% csrf_token %}
-    <input type="number" placeholder="Bid" min="{{ highest_bid.amount|add:1 }}" step=".01" name="amount" required> 
+    <input type="number" placeholder="Bid" min="{{ highest_bid.amount|add:1 }}" step=".01" name="amount" required value="{{ highest_bid.amount|add:1 }}"> 
     <button type="submit">Place Bid</button>
 </form>
 <h4>Details: </h4>
@@ -34,4 +41,10 @@
     <li>Listed by: <a href="{% url 'user_view' listing.owner.id %}">{{ listing.owner.username }}</a></li>
     <li>Categories: {% if categories|length > 0 %}{% for category in categories %}{{ category.title }},{% endfor %}{% else %}No Categories.{% endif %}</li>
 </ul>
+{% if listing.owner.id == request.user.id %}
+<form action="{% url 'close_listing' listing.id %}" method="POST">
+    {% csrf_token %}
+    <button type="submit">Close</button>
+</form>
+{% endif %}
 {% endblock %}

@@ -1,5 +1,8 @@
 {% for listing in listings %}
-<div class="listing">
+<div class="listing {% if listing.closed %}closed{% endif %}">
+    {% if listing.closed %}
+    <button>Closed</button>
+    {% endif %}
     {% if listing.image %}
     <img src="{{ listing.image }}" height="250px" width="250px">
     {% endif %}

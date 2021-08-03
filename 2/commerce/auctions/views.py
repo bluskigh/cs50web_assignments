@@ -28,14 +28,21 @@ def index(request):
     if category is not None:
         listings = [listing for listing in listings if listing.categories.filter(id=category).exists()]
 
+    wll = None
+    if request.user.is_authenticated:
+        wll = len(request.user.watch_list.all())
     return render(request, "auctions/index.html", 
             {'listings': listings,
-                'watch_list_length': len(request.user.watch_list.all())})
+                'watch_list_length': wll})
+
+
+def listings(request):
+    return render(request, "auctions/listings.html", {"listings": request.user.listings.all()})
 
 
 @login_required
 def watching(request):
-    return render(request, 'auctions/view_watching.html', {'listings': 
+    return render(request, 'auctions/view_watch_list.html', {'listings': 
         request.user.watch_list.all(), 'watch_list_length': 
         len(request.user.watch_list.all())})
 
@@ -66,14 +73,23 @@ def view_listing(request, listing_id):
         for bid in bids:
             if bid.amount > highest_bid.amount:
                 highest_bid = bid
+        # below subtracting one from bids_length because 1 is from the owner of the listing 
         return render(request, 'auctions/view_listing.html', 
-                {'listing': listing, 'bids': listing.bids.all(), 
+                {'listing': listing, 'bids_length': len(listing.bids.all())-1, 
                     'highest_bid': highest_bid, 
                     'watch_list_length': len(request.user.watch_list.all()),
                     'watching': listing in request.user.watch_list.all(),
                     'categories': listing.categories.all()})
     # return to home page showing error.
     return HttpRedirectResponse(reverse('index'))
+
+
+def close_listing(request, listing_id):
+    listing = Listing.objects.get(id=listing_id)
+    listing.closed = True 
+    listing.save()
+    return HttpResponseRedirect(reverse("view_listing", kwargs=
+        {"listing_id": listing_id}))
 
 
 @login_required

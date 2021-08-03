@@ -32,3 +32,24 @@ textarea {
     display: flex;
     align-items: center;
 }
+ul {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+ul li {
+    list-style-type: none;
+    margin: 0 .5em;
+}
+a {
+    text-decoration: none;
+    color: inherit;
+}
+a:hover {
+    text-decoration: underline;
+}
+.closed {
+    background: darkred;
+    color: red;
+    opacity: .5;
+}
