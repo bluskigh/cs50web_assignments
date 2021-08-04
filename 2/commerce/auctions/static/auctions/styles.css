@@ -48,8 +48,6 @@ a:hover {
 li {
     list-style-type: none;
 }
-
-
 .body-container {
     background: #3D3939;
     color: white;
@@ -59,7 +57,6 @@ li {
     padding: 2em 0;
     box-sizing: border-box;
 }
-
 footer {
     position: relative;
 }
@@ -70,8 +67,6 @@ footer p {
     padding-left: 1em;
     box-sizing: border-box;
 }
-
-
 .listing-container {
     max-width: 60%;
     width: 100%;
@@ -80,14 +75,6 @@ footer p {
     justify-content: center;
     flex-wrap: wrap;
 }
-/* not sure where listing-section is used */
-/* .listing-section {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-    width: 100%;
-} */
 .listing {
     background: white;
     color: black;
@@ -134,7 +121,6 @@ footer p {
     flex-wrap: wrap;
     padding: 1em 0;
 }
-
 .no-listing-image {
     align-items: center;
     justify-content: center;
@@ -184,11 +170,9 @@ footer p {
 .comments textarea {
     min-height: 1em;
 }
-
 button:hover {
     cursor: pointer;
 }
-
 .listing-view {
     display: flex;
     flex-direction: column;
@@ -215,6 +199,4 @@ hr {
     border-radius: .5em;
 }
 
-a {
-    color: black;
-}
+a { color: black;}

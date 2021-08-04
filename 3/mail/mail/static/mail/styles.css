@@ -1,0 +1,40 @@
+textarea {
+    min-height: 400px;
+}
+
+.center {
+    display: flex;
+    align-items: center;
+}
+.email-item {
+    width: 100%;
+    justify-content: space-between;
+    padding: .5em 1em;
+    box-sizing: border-box;
+    border: 1px solid black;
+}
+.email-info p {
+    margin-right: .5em;
+}
+.sent-recipient::before {
+    content: "To: ";
+    font-weight: 900;
+}
+.from-sender::before {
+    content: "From: ";
+    font-weight: 900;
+}
+.email-item:hover {
+    opacity: .5;
+    background: rgb(0, 0, 0, .4);
+    cursor: pointer;
+}
+.danger {
+    background: darkred;
+    color: red;
+}
+.subject::before {
+    content: "Subject: ";
+    font-weight: 900;
+    margin-left: .5em;
+}

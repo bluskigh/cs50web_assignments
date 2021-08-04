@@ -78,21 +78,23 @@ def remove_watching(request, listing_id):
         listing.watching.remove(request.user)
         return HttpResponseRedirect(reverse("view_listing", kwargs={"listing_id": listing_id}))
 
+def get_highest_bid(listing):
+    bids = listing.bids.all()
+    highest_bid = bids[0] 
+    for bid in bids:
+        if bid.amount > highest_bid.amount:
+            highest_bid = bid
+    return highest_bid
 
 @login_required(login_url='login')
 def view_listing(request, listing_id):
     # TODO show error saying listing was not found if None
     listing = Listing.objects.get(id=listing_id)
     if listing is not None:
-        bids = listing.bids.all()
-        highest_bid = bids[0] 
-        for bid in bids:
-            if bid.amount > highest_bid.amount:
-                highest_bid = bid
         # below subtracting one from bids_length because 1 is from the owner of the listing 
         return render(request, 'auctions/view_listing.html', 
                 {'listing': listing, 'bids_length': len(listing.bids.all())-1, 
-                    'highest_bid': highest_bid, 
+                    'highest_bid': get_highest_bid(listing), 
                     'watch_list_length': len(request.user.watch_list.all()),
                     'watching': listing in request.user.watch_list.all(),
                     'categories': listing.categories.all(), 
@@ -133,7 +135,7 @@ def add_listing(request):
             return HttpResponseRedirect(reverse("index"))
     return render(request, 'auctions/add_listing.html', {
         'form': ListingForm(), 'watch_list_length': 
-        len(request.user.watch_list.all()), 'categories': Categories.objects.all()})
+        len(request.user.watch_list.all())})
 
 
 @login_required

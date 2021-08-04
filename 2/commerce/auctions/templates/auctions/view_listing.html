@@ -1,9 +1,10 @@
 {% extends 'auctions/layout.html' %}
 {% block title %}Viewing '{{ listing.title }}{% endblock %}
 {% block body %}
+
+{% with is_closed=listing.closed %}
 {% if listing.owner.id == request.user.id %}
-{% if listing.closed %}
-{% else %}
+{% if is_closed == False %}
 <form action="{% url 'close_listing' listing.id %}" method="POST">
     {% csrf_token %}
     <button type="submit" class="danger">Close bid.</button>
@@ -14,7 +15,7 @@
 <!-- if the current user is not the owner of the listing currently being viewed -->
 {% if listing.owner.id != request.user.id %}
 <!-- and if the listing is closed -->
-{% if listing.closed %}
+{% if is_closed %}
 <!-- and if winner of the bid is the current user viewing the page -->
 {% if highest_bid.user.id == request.user.id %}
 <!-- display that the user was won the bid -->
@@ -41,7 +42,6 @@
 </form>
 <!-- end of watching checking statement -->
 {% endif %}
-
 {% endif %}
 <!-- end of checking if the user is not the current listing owner -->
 {% endif %}
@@ -56,17 +56,25 @@
         </div>
         <div style="display: flex; flex-direction: column; justify-content: space-around; height: 80%;">
             <p class="listing-description" style="margin: .5em 0;">{{ listing.description }}</p>
-            <h4>Details: </h4>
-            <ul style="margin: .5em 0;">
-                <li>Listed by: <a href="{% url 'user_view' listing.owner.id %}">{{ listing.owner.username }}</a></li>
-                <li>Categories: {% if categories|length > 0 %}{% for category in categories %}{{ category.title }},{% endfor %}{% else %}No Categories.{% endif %}</li>
-            </ul>
-            <p style="margin-top: 1em;">{% if bids_length == 0 %}Starting bid price: {% else %}Current bid price: {% endif %}<strong>${{ highest_bid.amount }}</strong> <sub>{{ bids_length }} bid(s). {% if highest_bid.user.id == request.user.id and highest_bid.user.id != listing.owner.id %}You're the current user with the highest bid.{% endif %}</sub></p>
-            <form action="{% url 'post_bid' listing.id %}" method="POST">
-                {% csrf_token %}
-                <input type="number" placeholder="Bid" min="{{ highest_bid.amount|add:1 }}" step=".01" name="amount" required value="{{ highest_bid.amount|add:1 }}"> 
-                <button type="submit">Place Bid</button>
-            </form>
+            <div style="display: flex; width: 100%; justify-content: space-between;">
+                <div style="display: flex;flex-direction: column;align-items: flex-start;">
+                    <h4>Details: </h4>
+                    <ul style="margin: .5em 0; text-align: left;">
+                        <li>Listed by: <a href="{% url 'user_view' listing.owner.id %}">{{ listing.owner.username }}</a></li>
+                        <li>Categories: {% if categories|length > 0 %}{% for category in categories %}{{ category.title }},{% endfor %}{% else %}No Categories.{% endif %}</li>
+                    </ul>
+                </div>
+                <div style="display: flex;flex-direction: column;align-items: flex-end;">
+                    <p style="margin-top: 1em;word-break: break-all; max-width: 70%;">{% if is_closed %}Final bid: {% else %}{% if bids_length == 0 %}Starting bid price: {% else %}Current bid price: {% endif %}{% endif %}<strong>${{ highest_bid.amount }}</strong> <sub>{{ bids_length }} bid(s). {% if highest_bid.user.id == request.user.id and request.user.id != listing.owner.id %}You're the current user with the highest bid.{% endif %}</sub></p>
+                    {% if listing.owner.id != request.user.id %}
+                    <form action="{% url 'post_bid' listing.id %}" method="POST">
+                        {% csrf_token %}
+                        <input type="number" placeholder="Bid" min="{{ highest_bid.amount|add:1 }}" step=".01" name="amount" required value="{{ highest_bid.amount|add:1 }}"> 
+                        <button type="submit">Place Bid</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </section>
 </section>
@@ -89,7 +97,7 @@
     <p>There are no comments</p>
     {% endif %}
 </section>
-{% if listing.closed %}
+{% if is_closed %}
     <script>
         document.querySelectorAll('input').forEach(item => {
             item.disabled = true;
@@ -105,4 +113,5 @@
         })
     </script>
 {% endif %}
+{% endwith %}
 {% endblock %}

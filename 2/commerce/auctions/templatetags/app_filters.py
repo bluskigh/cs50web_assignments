@@ -16,3 +16,14 @@ def contains_query(value):
     if category is None:
         return False
     return Categories.objects.get(id=category)
+
+
+@register.filter(name="get_highest_bid")
+def highest_bid(listing):
+    bids = listing.bids.all()
+    highest_bid = bids[0] 
+    for bid in bids:
+        if bid.amount > highest_bid.amount:
+            highest_bid = bid
+    return highest_bid.amount
+

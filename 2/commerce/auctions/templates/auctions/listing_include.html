@@ -18,11 +18,11 @@
         <div class="listing-information">
             <h2><a href="{% url 'view_listing' listing.id %}">{{ listing.title }}</a></h2>
             <p class="listing-description">{{ listing.description }}</p>
-            <p><strong>Price:</strong> {{ listing.starting_bid }}</p>
+            <p>Current bid: <strong>${{listing|get_highest_bid}}</strong></p>
         </div>
         <div class="categories">
             {% for category in listing.categories.all %}
-            <button>{{ category.title }}</button>
+            <a href="{% url 'index' %}?category={{category.id}}"><button type="submit">{{ category.title }}</button></a>
             {% endfor %}
         </div>
     </div>

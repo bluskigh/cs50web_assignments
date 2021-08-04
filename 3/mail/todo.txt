@@ -1,0 +1,5 @@
+You do not have to write any python code, they have done that for me. 
+Only write html and javascript code. They have an API they wrote in python 
+that they want me to use.
+
+After submitting look over the python code and see what they are doing, learn.
