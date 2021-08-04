@@ -2,6 +2,10 @@
 var compose_form;
 var emails_view;
 
+window.onpopstate = function(event) {
+  alert(`location: ${document.location}, state: ${JSON.stringify(event.state)}`)
+}
+
 document.addEventListener('DOMContentLoaded', function() {
 
   // Use buttons to toggle between views

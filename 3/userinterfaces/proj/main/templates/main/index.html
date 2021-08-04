@@ -1,0 +1,195 @@
+<!-- <!DOCTYPE html>
+<html>
+    <head>
+        <title>Index</title>
+    </head>
+    <body>
+        <button data-section=1>Section 1</button>
+        <button data-section=2>Section 2</button>
+        <button data-section=3>Section 3</button>
+        <section>
+        </section>
+    <script>
+/*
+        document.addEventListener('DOMContentLoaded', function() {
+            const section = document.querySelector('section');
+            document.querySelectorAll('button').forEach(item => {
+                item.addEventListener('click', function() {
+                    fetch(`/sections/${this.dataset.section}`)
+                    .then(async r => await r.text())
+                    .then(r => {
+                        section.innerText = r;
+                    }).catch(e => {console.log(e)})
+                })
+            })
+        })
+*/
+
+/*
+Above it looks like solid code, that does what it needs to do. But when thinking
+about the usability and user interface point of view. It's really not that good.
+The reason being is because the user does not have some sort of indiciation of 
+where he is. The url is not changing.
+
+Though this can be change by using javascripts history api. 
+---
+"Window object that provides access to the browsers session history. Exposes
+useful methods that allows to navigate through session history, and manipulate
+the contents of the history stack"
+
+If the history entry being activated was created by a call to history.pushState() or was affected by a call to history.replaceState(), the popstate event's state property contains a copy of the history entry's state object.
+
+*/
+
+window.addEventListener('popstate', function(event) {
+
+    showSection(event.state.section);
+})
+
+function showSection(section) {
+    fetch(`/sections/${section}`)
+    .then(r => r.text())
+    .then(r => {
+        console.log(r);
+        document.querySelector('section').innerText = r;
+    })
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    
+    section = document.querySelector('section');
+    document.querySelectorAll('button').forEach(item => {
+
+        item.addEventListener('click', function() {
+
+            const section = this.dataset.section;
+            history.pushState({section: section}, '', `sections${section}`)
+            showSection(section)
+        })
+    })
+})
+
+        
+    </script>
+    </body>
+</html> -->
+
+<!-- <html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi provident et rem excepturi quas voluptas ad dicta minus dignissimos nihil tempora similique harum, adipisci perspiciatis, eos molestias dolorem ipsam eum.</p>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            window.addEventListener('scroll', function() {
+                // if (document.body.offsetHeight - window.innerHeight < this.scrollY) {
+                if (this.scrollY + window.innerHeight >= document.body.offsetHeight) {
+                    document.querySelector('body').style.background = 'green';
+                } else {
+                    document.querySelector('body').style.background = 'white';
+                }
+            })
+        })
+    </script>
+</body>
+</html> -->
+
+<!-- Requesting post each time the end of the page is hit  -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui ut repellat culpa fugiat nam. Repellendus, modi dolorum possimus quaerat esse laudantium beatae natus maxime totam facilis et obcaecati sit suscipit.</p>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui ut repellat culpa fugiat nam. Repellendus, modi dolorum possimus quaerat esse laudantium beatae natus maxime totam facilis et obcaecati sit suscipit.</p>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui ut repellat culpa fugiat nam. Repellendus, modi dolorum possimus quaerat esse laudantium beatae natus maxime totam facilis et obcaecati sit suscipit.</p>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui ut repellat culpa fugiat nam. Repellendus, modi dolorum possimus quaerat esse laudantium beatae natus maxime totam facilis et obcaecati sit suscipit.</p>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui ut repellat culpa fugiat nam. Repellendus, modi dolorum possimus quaerat esse laudantium beatae natus maxime totam facilis et obcaecati sit suscipit.</p>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui ut repellat culpa fugiat nam. Repellendus, modi dolorum possimus quaerat esse laudantium beatae natus maxime totam facilis et obcaecati sit suscipit.</p>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui ut repellat culpa fugiat nam. Repellendus, modi dolorum possimus quaerat esse laudantium beatae natus maxime totam facilis et obcaecati sit suscipit.</p>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui ut repellat culpa fugiat nam. Repellendus, modi dolorum possimus quaerat esse laudantium beatae natus maxime totam facilis et obcaecati sit suscipit.</p>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui ut repellat culpa fugiat nam. Repellendus, modi dolorum possimus quaerat esse laudantium beatae natus maxime totam facilis et obcaecati sit suscipit.</p>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui ut repellat culpa fugiat nam. Repellendus, modi dolorum possimus quaerat esse laudantium beatae natus maxime totam facilis et obcaecati sit suscipit.</p>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui ut repellat culpa fugiat nam. Repellendus, modi dolorum possimus quaerat esse laudantium beatae natus maxime totam facilis et obcaecati sit suscipit.</p>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui ut repellat culpa fugiat nam. Repellendus, modi dolorum possimus quaerat esse laudantium beatae natus maxime totam facilis et obcaecati sit suscipit.</p>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui ut repellat culpa fugiat nam. Repellendus, modi dolorum possimus quaerat esse laudantium beatae natus maxime totam facilis et obcaecati sit suscipit.</p>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui ut repellat culpa fugiat nam. Repellendus, modi dolorum possimus quaerat esse laudantium beatae natus maxime totam facilis et obcaecati sit suscipit.</p>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui ut repellat culpa fugiat nam. Repellendus, modi dolorum possimus quaerat esse laudantium beatae natus maxime totam facilis et obcaecati sit suscipit.</p>
+    <!-- zoom in for the screen to fill up -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const body = document.querySelector('body');
+            // check if the user reached the end of the screen
+            window.addEventListener('scroll', function() {
+
+                if (window.scrollY + window.innerHeight >= document.body.offsetHeight) {
+                    // reached the end of the page load more items
+                    // first fetch the default amount
+                    fetch('/items?start=0')
+                    .then(async r => await r.json())
+                    .then (r => {
+                        console.log(r);
+                        for (const i of r) {
+                            const temp = document.createElement('p');
+                            temp.innerText = i;
+                            const random_color = () => Math.floor(Math.random() * 255);
+                            temp.style.color = `rgb(${random_color()}, ${random_color()}, ${random_color()})`;
+                            body.appendChild(temp);
+                        }
+                    })
+                    .catch(e => {console.error(e);})
+
+                }
+            })
+
+        })
+    </script>
+</body>
+</html>
