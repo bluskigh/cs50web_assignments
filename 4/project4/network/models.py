@@ -31,3 +31,7 @@ class Post(models.Model):
     likes = models.ManyToManyField(Like, blank=True, related_name="post")
     # when the post was created
     created = models.DateTimeField(auto_now=True)
+
+    def clean(self):
+        return {"id": self.id, "title": self.title, "text": self.text, 
+                "likes": len(self.likes.all()), "created": self.created}

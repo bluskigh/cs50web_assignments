@@ -47,7 +47,7 @@
         editForm.addEventListener("submit", function(e) {
 
             e.preventDefault();
-            fetch(`/edit_post/${this.parentElement.dataset.id}`, {
+            fetch(`/posts?id=${this.parentElement.dataset.id}`, {
                 method: "PATCH",
                 mode: "same-origin",  // used so that I do not send CSRF token anywher else. good practice. https://docs.djangoproject.com/en/3.2/ref/csrf/#setting-the-token-on-the-ajax-request 
                 headers: new Headers({
@@ -91,7 +91,7 @@
                 // the post data, also disable the inputs
                 parentElement.appendChild(editForm);
 
-                fetch(`/edit_post/${parentElement.dataset.id}`)
+                fetch(`/posts?id=${parentElement.dataset.id}`)
                 .then(async r => await r.json())
                 .then(r => {
                     // information of post recieved, set form edit inputs value to the information recieved.

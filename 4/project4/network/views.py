@@ -24,43 +24,47 @@ def index(request):
 
 @login_required
 def posts(request):
-    if request.method == "POST":
+    if request.method == "GET":
+        if request.GET.get("id"):
+            post = Post.objects.get(id=request.GET.get("id"))
+            return JsonResponse({"title": post.title, "text": post.text})
+        else:
+            return JsonResponse({"posts": [post.clean() for post in Post.objects.all()]})
+    elif request.method == "POST":
         form = PostForm(request.POST)
         if form.is_valid():
             cd = form.cleaned_data
-            print(cd)
-            print(type(cd))
             Post.objects.create(title=cd.get("title"), text=cd.get("text"),
                 user=request.user)
-        return HttpResponseRedirect(reverse("index"))
+        return HttpResponse(status=200)
+    elif request.method == "PATCH":
+        # getting data sent via json
+        id = request.GET.get("id")
+        if id is None:
+            return Http404("Missing id value")
+        post = Post.objects.get(id=id)
+        if post is None:
+            return Http404(f"Could not find post of id: {id}")
+        if post.user.id != request.user.id:
+            return HttpResponse("Unauthorized", status=401) 
+        if request.method == "GET":
+            return JsonResponse({"title": post.title, "text": post.text})
+        elif request.method == "PATCH":
+            try:
+                data = loads(request.body)
+                title = data.get("title")
+                text = data.get("text")
+                if title is not None and (title != post.title):
+                    post.title = title
+                if text is not None and (text != post.text):
+                    post.text = text
+                post.save()
+                return HttpResponse("Updated", status=200)
+            except Exception as e:
+                print(e)
+                return HttpResponse("Server Error", status=500)
     # TODO change this 
     return Http404('You are not supposed to get here.')
-
-
-@login_required
-def edit_post(request, id):
-    post = Post.objects.get(id=id)
-    if post is None:
-        return Http404(f"Could not find post of id: {id}")
-    if post.user.id != request.user.id:
-        return HttpResponse("Unauthorized", status=401) 
-    if request.method == "GET":
-        return JsonResponse({"title": post.title, "text": post.text})
-    elif request.method == "PATCH":
-        try:
-            # getting data sent via json
-            data = loads(request.body)
-            title = data.get("title")
-            text = data.get("text")
-            if title is not None and (title != post.title):
-                post.title = title
-            if text is not None and (text != post.text):
-                post.text = text
-            post.save()
-            return HttpResponse("Updated", status=204)
-        except Exception as e:
-            print(e)
-            return HttpResponse("Server Error", status=500)
 
 
 def login_view(request):
