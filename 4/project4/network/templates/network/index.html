@@ -1,0 +1,106 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+<h1>All Posts</h1>
+<form action="posts" method="POST">
+    {% csrf_token %}
+    <h2>New Post</h2>
+    {{ new_post_form.title }}
+    {{ new_post_form.text }}
+    <button class="btn-info" type="submit">Post</button>
+</form>
+
+<form id="edit-form" class="hidden" action="#" method="POST">
+    {% csrf_token %}
+    Edit Post
+    {{ edit_post_form.title }}
+    {{ edit_post_form.text }}
+    <button type="submit">Edit</button>
+</form>
+
+{% if posts %}
+{% for post in posts %}
+<div class="post" data-id={{ post.id }}>
+    <div class="post-content">
+        {% if post.user.id == request.user.id %}
+        <button class="edit">Edit</button>
+        {% endif %}
+        <h3>{{ post.title }}</h3>
+        <p>{{ post.text }}</p>
+        <span><img src="{% static 'network/images/heart.svg' %}" height="15px" width="15px"> {{ post.likes|length }}</span>
+        <a href="#">Comment</a>
+    </div>
+</div>
+{% endfor %}
+{% else %}
+<p>There are no posts.</p>
+{% endif %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+
+        const editForm = document.querySelector("#edit-form");
+        const edit_title_input = editForm.querySelector("#id_title");
+        const edit_text_input = editForm.querySelector("#id_text");
+
+        editForm.addEventListener("submit", function(e) {
+
+            e.preventDefault();
+            fetch(`/edit_post/${this.parentElement.dataset.id}`, {
+                method: "PATCH",
+                mode: "same-origin",  // used so that I do not send CSRF token anywher else. good practice. https://docs.djangoproject.com/en/3.2/ref/csrf/#setting-the-token-on-the-ajax-request 
+                headers: new Headers({
+                    "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken").value,
+                    "Content-Type": "application/json"
+                }),
+                body: JSON.stringify({
+                    title: edit_title_input.value,
+                    text: edit_text_input.value
+                })
+            })
+            .then(r => {
+                // remove editing class
+                this.parentElement.classList.toggle("editing");
+
+                // move this form from the post to the body and hide
+                document.querySelector("body").appendChild(this);
+
+                // replacing the text of the post title and text with the patched version
+                this.parentElement.querySelector("h3").innerText = edit_title_input.value;
+                this.parentElement.querySelector("p").innerText = edit_text_input.value;
+
+                // erasing the input since its not going to belong to anything anymore, when it belongs
+                // to a post, then it will be filled with the posts information.
+                edit_title_input.value = null;
+                edit_text_input.value = null;
+            }).catch(e => {console.log(e);})
+        })
+
+        document.querySelectorAll(".edit").forEach(item => {
+
+            item.addEventListener("click", function() {
+
+                const parentElement = this.parentElement.parentElement;
+
+                // add editing class
+                parentElement.classList.toggle("editing");
+
+                const content = parentElement.querySelector(".post-content");
+                // TODO add an animation where the content is inactive when we are trying to load
+                // the post data, also disable the inputs
+                parentElement.appendChild(editForm);
+
+                fetch(`/edit_post/${parentElement.dataset.id}`)
+                .then(async r => await r.json())
+                .then(r => {
+                    // information of post recieved, set form edit inputs value to the information recieved.
+                    edit_title_input.value = r.title;
+                    edit_text_input.value = r.text;
+                }).catch(e => {console.log(e);})
+
+            })
+        });
+    })
+</script>
+{% endblock %}
