@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </body>
 </html> -->
 
-<!-- Requesting post each time the end of the page is hit  -->
+<!-- Requesting post each time the end of the page is hit 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui ut repellat culpa fugiat nam. Repellendus, modi dolorum possimus quaerat esse laudantium beatae natus maxime totam facilis et obcaecati sit suscipit.</p>
     <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui ut repellat culpa fugiat nam. Repellendus, modi dolorum possimus quaerat esse laudantium beatae natus maxime totam facilis et obcaecati sit suscipit.</p>
     <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui ut repellat culpa fugiat nam. Repellendus, modi dolorum possimus quaerat esse laudantium beatae natus maxime totam facilis et obcaecati sit suscipit.</p>
-    <!-- zoom in for the screen to fill up -->
+    zoom in for the screen to fill up
     <script>
         document.addEventListener('DOMContentLoaded', function() {
 
@@ -190,6 +190,133 @@ document.addEventListener('DOMContentLoaded', function() {
             })
 
         })
+    </script>
+</body>
+</html> -->
+<!-- 
+    animations
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aniamte</title>
+<style>
+    @keyframes grow {
+        0% {
+            left: 0%;
+        }
+        50% {
+            left: 50%;
+        }
+        100% {
+            left: 0%;
+        }
+    }
+
+    h1 {
+        position: relative;
+        animation-name: grow;
+        animation-duration: 2s;
+        animation-fill-mode: forwards;
+        animation-iteration-count: infinite;
+    }
+</style>
+</head>
+<body>
+    <h1>Hello</h1>
+    <button class='hide'>click here</button>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const hello = document.querySelector('h1');
+            hello.style.animationPlayState = 'paused';
+            const button = document.querySelector('button');
+            button.addEventListener('click', function() {
+                if (hello.style.animationPlayState == 'paused') {
+                    hello.style.animationPlayState = null;
+                } else {
+                    hello.style.animationPlayState = 'paused';
+                }
+            })
+
+            document.addEventListener('click', event => {
+                // what did the user click on
+                const target = event.target; 
+                if (target.classList.contains('hide')) {
+                    target.parentElement.addEventListener('animationend', function(){})
+                }
+            })
+        })
+
+
+    </script>
+
+</body>
+</html> -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React</title>
+</head>
+<body>
+
+    <div id="app"></div>
+
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <!-- tell the browser that it will need to translate jsx code into javascript code (in product translate before showing the page) -->
+    <script type="text/babel">
+        // component = some part of my user interface
+
+        function App() {
+
+            // creating state for this component
+            const [count, setCount] = React.useState(0); // react hook that allows me to add additonal functionality into my react component, returns value and function that lets me change the value of the state
+            // 0 = initial state of as the argument
+
+            function updateCount() {
+                setCount(count + 1)
+            }
+
+            // when state changes react knows to re-render the component 
+
+            // returns what should appear in the component
+            return (
+                <div>
+                    <div>{ count }</div>
+                    <button onClick={updateCount}>Count</button>
+                </div>
+            )
+        }
+
+        function Hello(props) {
+
+            // html elements can take attributes, components can take properties (props)
+            // state = any kind of data we want to store in the component itself
+
+            return (
+                // using the name argument
+                <h1>Hello, {props.name}!</h1>
+            )
+        }
+
+        function MultipleHello() {
+
+            return (
+                <div>
+                <Hello name="Harry"/>
+                <Hello name="Mario"/>
+                <Hello name="Brian"/>
+                </div>
+            )
+        }
+    
+        // component, where to render 
+        ReactDOM.render(<App />, document.querySelector("#app"))
     </script>
 </body>
 </html>

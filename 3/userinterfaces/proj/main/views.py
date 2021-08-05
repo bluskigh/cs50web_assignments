@@ -35,3 +35,6 @@ def items(request):
     return JsonResponse(item_list, safe=False)
 
 
+def math(request):
+    return render(request, 'main/math.html')
+

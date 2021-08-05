@@ -1,0 +1,70 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Question</title>
+    <style>
+        .incorrect {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script type="text/babel">
+        const randomNumber = () => Math.floor(Math.random() * 15);
+        function Main() {
+
+            // const [first, setFirst] = React.useState(randomNumber());
+            // const [second, setSecond] = React.useState(randomNumber());
+            // const [guess, setGuess] = React.useState(null);
+            const [state, setState] = React.useState({
+                incorrect: false,
+                score: 0,
+                total: 2,
+                first: randomNumber(),
+                second: randomNumber(),
+                guess: null
+            })
+
+            function decide() {
+                /// ...state <- spread operator keep everything else but update guess
+                if (state.second + state.first == state.guess) {
+                    setState({...state, score: state.score + 1, first: randomNumber(), second: randomNumber(), guess: "", incorrect: false});
+                } else {
+                    // spread has to come first
+                    setState({...state, score: state.score - 1, guess: "", incorrect: true});
+                }
+            }
+
+            function guessChange(event) {
+                // this event listener as with all return an event, which can be used to get ahold of the target (element that has the event listener currently being activated)
+                setState({...state, guess: event.target.value});
+            }
+
+            if (state.score === state.total) {
+                return (
+                    <div>
+                        <h1>You have won!</h1>
+                    </div>
+                )
+            } else {
+                return (
+                    <div>
+                        <h1 className={state.incorrect ? "incorrect" : ""}>What is {state.first} + {state.second}?</h1>
+                        <input type="number" value={state.guess} onChange={guessChange} placeholder="Enter a number" autofocus="true"/>
+                        <button onClick={decide}>Submit</button>
+                        <p>Score: {state.score}</p>
+                    </div>
+                )
+            }
+        }
+
+        ReactDOM.render(<Main />, document.querySelector('#container'))
+    </script>
+</body>
+</html>
