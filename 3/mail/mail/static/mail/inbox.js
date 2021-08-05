@@ -3,16 +3,30 @@ var compose_form;
 var emails_view;
 
 window.onpopstate = function(event) {
-  alert(`location: ${document.location}, state: ${JSON.stringify(event.state)}`)
+  if (event.state.is_mailbox) {
+    load_mailbox(event.state.mailbox);
+  } else {
+    console.log('trying to load compose email');
+    compose_email();
+  }
 }
 
+// after the document has been loaded write the logic for this script 
 document.addEventListener('DOMContentLoaded', function() {
 
   // Use buttons to toggle between views
-  document.querySelector('#inbox').addEventListener('click', () => load_mailbox('inbox'));
-  document.querySelector('#sent').addEventListener('click', () => load_mailbox('sent'));
-  document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
-  document.querySelector('#compose').addEventListener('click', compose_email);
+  document.querySelectorAll('.mailbox').forEach(item => {
+    item.addEventListener('click', function() {
+      const mailbox = this.dataset.name;
+      history.pushState({is_mailbox: true, mailbox}, '', `mailbox_${mailbox}`)
+      load_mailbox(mailbox);
+    })
+  })
+
+  document.querySelector('#compose').addEventListener('click', function() {
+    history.pushState({is_mailbox: false}, '', 'mailbox_compose')
+    compose_email()
+  });
 
   // By default, load the inbox
   load_mailbox('inbox');
