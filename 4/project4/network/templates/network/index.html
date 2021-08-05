@@ -3,7 +3,7 @@
 
 {% block body %}
 <h1>All Posts</h1>
-<form action="posts" method="POST">
+<form action="posts" id="add-post-form" method="POST">
     {% csrf_token %}
     <h2>New Post</h2>
     {{ new_post_form.title }}
@@ -19,30 +19,88 @@
     <button type="submit">Edit</button>
 </form>
 
+<input type="text" id="heart-location" value="{% static 'images/heart.png' %}">
+
+<section id="posts">
 {% if posts %}
-{% for post in posts %}
-<div class="post" data-id={{ post.id }}>
-    <div class="post-content">
-        {% if post.user.id == request.user.id %}
-        <button class="edit">Edit</button>
-        {% endif %}
-        <h3>{{ post.title }}</h3>
-        <p>{{ post.text }}</p>
-        <span><img src="{% static 'network/images/heart.svg' %}" height="15px" width="15px"> {{ post.likes|length }}</span>
-        <a href="#">Comment</a>
+    {% for post in posts %}
+    <div class="post" data-id={{ post.id }}>
+        <div class="post-content">
+            {% if post.user.id == request.user.id %}
+            <button class="edit">Edit</button>
+            {% endif %}
+            <h3>{{ post.title }}</h3>
+            <p>{{ post.text }}</p>
+            <span><img src="{% static 'network/images/heart.svg' %}" height="15px" width="15px"> {{ post.likes|length }}</span>
+            <a href="#">Comment</a>
+        </div>
     </div>
-</div>
-{% endfor %}
+    {% endfor %}
 {% else %}
-<p>There are no posts.</p>
+    <p>There are no posts.</p>
 {% endif %}
+</section>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
 
+        const postsContainer = document.querySelector("#posts"); 
+        const addPostForm = document.querySelector("#add-post-form");
+        addPostForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            fetch("/posts", {
+                method: "POST",
+                headers: new Headers({
+                    "X-CSRFToken": this.querySelector("[name=csrfmiddlewaretoken]").value,
+                    "Content-Type": "application/json" 
+                }),
+                body: JSON.stringify({
+                    "title": addPostForm.querySelector("#id_title").value,
+                    "text": addPostForm.querySelector("#id_text").value
+                })
+            })
+            .then(async r => await r.json())
+            .then(r => {
+                // no json is  returned, but a status code is
+
+                // creating the post
+                const tempContainer = document.createElement("div");
+                tempContainer.classList.add("post")
+                tempContainer.dataset.id = r.id;
+                const tempContentContainer = document.createElement("div");
+                tempContentContainer.classList.add("post-content")
+                if (r.is_owner) {
+                    const editButton = document.createElement("button");
+                    editButton.classList.add("edit")
+                }
+                const header = document.createElement("h3");
+                header.innerText = r.title;
+                const paragraph = document.createElement("p");
+                paragraph.innerText = r.text;
+                const spanContainer = document.createElement("span");
+                const heart = document.createElement("img");
+                heart.setAttribute("src", "/static/network/images/heart.svg")
+                heart.setAttribute("height", "15px")
+                heart.setAttribute("width", "15px")
+                const tempP = document.createElement("p");
+                tempP.innerHTML = `&nbsp;${r.likes}&nbsp;`;
+                tempP.style.display = "inline-block";
+                spanContainer.appendChild(heart)
+                spanContainer.appendChild(tempP)
+                const comment = document.createElement("a");
+                comment.innerText = "Comment";
+                tempContentContainer.appendChild(header)
+                tempContentContainer.appendChild(paragraph)
+                tempContentContainer.appendChild(spanContainer)
+                tempContentContainer.appendChild(comment)
+                tempContainer.appendChild(tempContentContainer)
+                postsContainer.appendChild(tempContainer)
+            })
+        })
+
         const editForm = document.querySelector("#edit-form");
-        const edit_title_input = editForm.querySelector("#id_title");
-        const edit_text_input = editForm.querySelector("#id_text");
+        const editTitleInput = editForm.querySelector("#id_title");
+        const editTextInput = editForm.querySelector("#id_text");
 
         editForm.addEventListener("submit", function(e) {
 
@@ -55,8 +113,8 @@
                     "Content-Type": "application/json"
                 }),
                 body: JSON.stringify({
-                    title: edit_title_input.value,
-                    text: edit_text_input.value
+                    title: editTitleInput.value,
+                    text: editTextInput.value
                 })
             })
             .then(r => {
@@ -67,13 +125,13 @@
                 document.querySelector("body").appendChild(this);
 
                 // replacing the text of the post title and text with the patched version
-                this.parentElement.querySelector("h3").innerText = edit_title_input.value;
-                this.parentElement.querySelector("p").innerText = edit_text_input.value;
+                this.parentElement.querySelector("h3").innerText = editTitleInput.value;
+                this.parentElement.querySelector("p").innerText = editTextInput.value;
 
                 // erasing the input since its not going to belong to anything anymore, when it belongs
                 // to a post, then it will be filled with the posts information.
-                edit_title_input.value = null;
-                edit_text_input.value = null;
+                editTitleInput.value = null;
+                editTextInput.value = null;
             }).catch(e => {console.log(e);})
         })
 
@@ -95,8 +153,8 @@
                 .then(async r => await r.json())
                 .then(r => {
                     // information of post recieved, set form edit inputs value to the information recieved.
-                    edit_title_input.value = r.title;
-                    edit_text_input.value = r.text;
+                    editTitleInput.value = r.title;
+                    editTextInput.value = r.text;
                 }).catch(e => {console.log(e);})
 
             })

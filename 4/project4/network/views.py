@@ -31,12 +31,12 @@ def posts(request):
         else:
             return JsonResponse({"posts": [post.clean() for post in Post.objects.all()]})
     elif request.method == "POST":
-        form = PostForm(request.POST)
-        if form.is_valid():
-            cd = form.cleaned_data
-            Post.objects.create(title=cd.get("title"), text=cd.get("text"),
-                user=request.user)
-        return HttpResponse(status=200)
+        data = loads(request.body) 
+        if data.get("title") is None or data.get("text") is None:
+            return HttpResponse("Bad Request", status=400)
+        post = Post.objects.create(title=data.get("title"), text=data.get("text"),
+            user=request.user)
+        return JsonResponse(post.clean()) 
     elif request.method == "PATCH":
         # getting data sent via json
         id = request.GET.get("id")
