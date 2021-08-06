@@ -23,6 +23,7 @@ def get_posts(request, posts):
     """ Returns 10 post depending on the start and end that is found in the
     url arguments"""
     current_page = request.GET.get("page") or -1
+    current_page = int(current_page)
     if current_page == 0:
         current_page = -1
     elif current_page > 0:
@@ -59,8 +60,9 @@ def reverse_chronological_order(posts):
 
 
 def index(request):
-    return render(request, "network/index.html", {"new_post_form": PostForm(),
-        "posts": get_posts(request, Post.objects.all()), "edit_post_form": PostForm()})
+    return render(request, "network/index.html", {
+        "new_post_form": PostForm(),
+        "edit_post_form": PostForm()})
 
 
 @login_required
@@ -76,8 +78,7 @@ def users(request, id):
         "username": user.username,
         "followers": user.followers.all(),
         "following": user.following.all(),
-        "is_following": is_following,
-        "posts": reverse_chronological_order(user.posts.all())
+        "is_following": is_following
         })
 
 

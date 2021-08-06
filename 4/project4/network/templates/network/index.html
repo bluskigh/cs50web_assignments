@@ -24,47 +24,137 @@
 {% include "network/posts_include.html" %}
 
 <script>
+    var information = [];
+    var  postsContainer;
+
+    window.onpopstate = function(event) {
+
+        console.log("Below is the state: ")
+        console.log(event.state)
+        showPosts(event.state.information)
+    }
+
+    function clearPosts() {
+
+        while(postsContainer.children.length) {
+            postsContainer.removeChild(postsContainer.children[0])
+        }
+    }
+
+    function showPosts(information_array) {
+
+        console.log(information_array)
+        clearPosts()
+        for (const information in information_array) {
+            console.log(information)
+            // might have to change to insertBefore
+            createPosts(information)
+        }
+    }
+
+    function like(e) {
+
+        const post_id = this.parentElement.parentElement.parentElement.dataset.id;
+        var currentState = this.classList.contains("liked");
+        fetch("/likes", {
+
+            method: !currentState? "POST" : "DELETE",
+            mode: "same-origin",
+            headers: new Headers({
+
+                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken").value,
+                "Content-Type": "application/json"
+            }),
+            body: JSON.stringify({post_id, liked: !currentState})
+        })
+        .then(r => {
+
+            const nextSibling = this.nextElementSibling;
+            if (!currentState == true) {
+                // liked
+                nextSibling.innerText = parseInt(nextSibling.innerText) + 1;
+                this.classList.add("liked")
+            } else {
+                // unliked
+                nextSibling.innerText = parseInt(nextSibling.innerText) - 1;
+                this.classList.remove("liked")
+            }
+        })
+
+    }
+
+    function createPost(post_information) {
+
+        // inserting the information, at index because the array of posts is in reverse chronological order
+        information.splice(0, 0, post_information)
+        // creating the post
+        const tempContainer = document.createElement("div");
+        tempContainer.classList.add("post")
+        tempContainer.dataset.id = post_information.id;
+        const tempContentContainer = document.createElement("div");
+        tempContentContainer.classList.add("post-content")
+        const editButton = document.createElement("button");
+        editButton.classList.add("edit")
+        editButton.innerText = "Edit"
+        const header = document.createElement("h3");
+        header.innerText = post_information.title;
+        const paragraph = document.createElement("p");
+        paragraph.innerText = post_information.text;
+        const spanContainer = document.createElement("span");
+        const heart = document.createElement("img");
+        heart.classList.add("heart")
+        heart.setAttribute("src", "/static/network/images/heart.svg")
+        heart.setAttribute("height", "15px")
+        heart.setAttribute("width", "15px")
+        heart.addEventListener("click", like)
+        const tempP = document.createElement("p");
+        tempP.innerHTML = `&nbsp;${post_information.likes}&nbsp;`;
+        tempP.style.display = "inline-block";
+        spanContainer.appendChild(heart)
+        spanContainer.appendChild(tempP)
+        // for created or updated 
+        const time = document.createElement("time");
+        time.setAttribute("datetime", post_information.created)
+        time.innerText = (post_information.updated ? "Updated: " : "") + post_information.created;
+        const comment = document.createElement("a");
+        comment.innerText = "Comment";
+        tempContentContainer.appendChild(editButton)
+        tempContentContainer.appendChild(header)
+        tempContentContainer.appendChild(paragraph)
+        tempContentContainer.appendChild(spanContainer)
+        tempContentContainer.appendChild(time)
+        tempContentContainer.appendChild(comment)
+        tempContainer.appendChild(tempContentContainer)
+        postsContainer.appendChild(tempContainer)
+        // postsContainer.insertBefore(tempContainer, postsContainer.firstChild)
+    } 
+
+
+
     document.addEventListener("DOMContentLoaded", function() {
 
-        function like(e) {
-
-            const post_id = this.parentElement.parentElement.parentElement.dataset.id;
-            var currentState = this.classList.contains("liked");
-            fetch("/likes", {
-
-                method: !currentState? "POST" : "DELETE",
-                mode: "same-origin",
-                headers: new Headers({
-
-                    "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken").value,
-                    "Content-Type": "application/json"
-                }),
-                body: JSON.stringify({post_id, liked: !currentState})
-            })
-            .then(r => {
-
-                const nextSibling = this.nextElementSibling;
-                if (!currentState == true) {
-                    // liked
-                    nextSibling.innerText = parseInt(nextSibling.innerText) + 1;
-                    this.classList.add("liked")
-                } else {
-                    // unliked
-                    nextSibling.innerText = parseInt(nextSibling.innerText) - 1;
-                    this.classList.remove("liked")
-                }
-            })
-
-        }
 
         document.querySelectorAll(".heart").forEach(item => {
 
             item.addEventListener("click", like);
         })
 
-        const postsContainer = document.querySelector("#posts"); 
+        postsContainer = document.querySelector("#posts"); 
         const userId = postsContainer.dataset.userId;
         const addPostForm = document.querySelector("#add-post-form");
+        // PREVIOUS AND NEXT BUTTON FUNCTIONALITY
+        var start = 0;
+
+
+        // when the document loads get all the posts and render in the postsContainer
+        fetch(`/posts?page=${start}`)
+        .then(async r => await r.json())
+        .then(r => {
+            for (const post of r.posts) {
+                createPost(post)
+            }
+        }).catch(e => {console.log(e)})
+
         addPostForm.addEventListener("submit", function(e) {
 
             e.preventDefault();
@@ -85,52 +175,10 @@
             })
             .then(async r => await r.json())
             .then(r => {
-
-                // creating the post
-                const tempContainer = document.createElement("div");
-                tempContainer.classList.add("post")
-                tempContainer.dataset.id = r.id;
-                const tempContentContainer = document.createElement("div");
-                tempContentContainer.classList.add("post-content")
-                const editButton = document.createElement("button");
-                editButton.classList.add("edit")
-                editButton.innerText = "Edit"
-                const header = document.createElement("h3");
-                header.innerText = r.title;
-                const paragraph = document.createElement("p");
-                paragraph.innerText = r.text;
-                const spanContainer = document.createElement("span");
-                const heart = document.createElement("img");
-                heart.classList.add("heart")
-                heart.setAttribute("src", "/static/network/images/heart.svg")
-                heart.setAttribute("height", "15px")
-                heart.setAttribute("width", "15px")
-                heart.addEventListener("click", like)
-                const tempP = document.createElement("p");
-                tempP.innerHTML = `&nbsp;${r.likes}&nbsp;`;
-                tempP.style.display = "inline-block";
-                spanContainer.appendChild(heart)
-                spanContainer.appendChild(tempP)
-                // for created or updated 
-                const time = document.createElement("time");
-                time.setAttribute("datetime", r.created)
-                time.innerText = (r.updated ? "Updated: " : "") + r.created;
-                const comment = document.createElement("a");
-                comment.innerText = "Comment";
-                tempContentContainer.appendChild(editButton)
-                tempContentContainer.appendChild(header)
-                tempContentContainer.appendChild(paragraph)
-                tempContentContainer.appendChild(spanContainer)
-                tempContentContainer.appendChild(time)
-                tempContentContainer.appendChild(comment)
-                tempContainer.appendChild(tempContentContainer)
-                postsContainer.insertBefore(tempContainer, postsContainer.firstChild)
+                createPost(r)
             })
         })
 
-        // PREVIOUS AND NEXT BUTTON FUNCTIONALITY
-        var start = 0;
-        var end = 10;
 
         // when the document loads we want to determine whether to show the previous and next button
         // based on current functionality we are not checking for previous since on view load
@@ -140,10 +188,18 @@
         const previousButton = document.querySelector("#previous");
 
         nextButton.addEventListener("click", function() {
-            fetch("/posts?start=0")
+
+            // load all the posts that are on page + 1 from current
+            start += 1;
+            fetch(`/posts?page=${start+1}`)
             .then(async r => await r.json())
             .then(r => {
-                console.log(r)
+                console.log("going to push: ", information)
+                // TODO for now just show the state change in the url, in future put ul list with 1, 2, 3 etc. when clicked on 1 2 3 use history api to pop current state and go(2) etc.
+                history.pushState({information: information}, '', `page${start}`)
+                information = [];
+                // remove all the children
+                clearPosts()
             }).catch(e => console.log(e))
         })
 
