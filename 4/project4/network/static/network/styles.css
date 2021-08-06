@@ -35,3 +35,10 @@ textarea {
 .liked {
     filter: invert(0%);
 }
+
+.follow::after {
+    content: "Follow";
+}
+.following::after {
+    content: "Following";
+}

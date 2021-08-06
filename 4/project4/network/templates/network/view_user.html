@@ -1,5 +1,43 @@
 {% extends "network/layout.html" %}
-{% block title %}{{ user.username }}{% endblock %}
+{% block title %}{{ username }}{% endblock %}
 {% block body %}
-<h1>{{ user.username }}</h1>
+<h1>{{ username }}</h1>
+<p>Following: {{ following|length }}</p>
+<p>Followers: <span id="followers">{{ followers|length }}</span></p>
+{% if request.user.id != id %}
+<form action="#" id="follow-form">
+    {% csrf_token %}
+    <button class="follow{% if is_following %} following{% endif %}" data-user-id="{{ id }}" data-following={% if is_following %}true{% else %}false{% endif %} type="submit"></button>
+</form>
+{% endif %}
+
+<script>
+    const followForm = document.querySelector("#follow-form");
+    followForm.addEventListener("submit", function(e) {
+        e.preventDefault()
+        const followButton = followForm.querySelector("button");
+        const following = followButton.dataset.following == "true";
+        fetch(`/users/${followButton.dataset.userId}/following`, {
+            method: following ? "DELETE" : "POST",
+            mode: "same-origin",
+            headers: new Headers({
+                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+                "Content-Type": "application/json"
+            }),
+            body: JSON.stringify({
+                following_state: following
+            })
+        })
+        .then(r => {
+            if (r.status == 200) {
+                followButton.dataset.following = !following;
+                followButton.classList.toggle("following")
+                const followers = document.querySelector("#followers");
+                followers.innerText = parseInt(followers.innerText) + (following ? -1 : 1);
+            } else {
+                alert("Could not unfollow you from the user")
+            }
+        }).catch(e => {console.log(e)})
+    })
+</script>
 {% endblock %}

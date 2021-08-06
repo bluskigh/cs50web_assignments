@@ -4,8 +4,14 @@ from django.db import models
 
 class User(AbstractUser):
     pass
-    # following = models.ForeignKey('self', on_delete=models.CASCADE, 
-            related_name="followers")
+
+class Follow(models.Model):
+    # the person that is following
+    who = models.ForeignKey(User, on_delete=models.CASCADE, 
+            related_name="following") 
+    # the person that is being followed
+    to = models.ForeignKey(User, on_delete=models.CASCADE, 
+            related_name="followers") 
 
 
 class Like(models.Model):

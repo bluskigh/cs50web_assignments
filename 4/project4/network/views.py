@@ -7,7 +7,7 @@ from django.urls import reverse
 from django import forms
 from json import loads
 
-from .models import User, Comment, Like, Post
+from .models import User, Comment, Like, Post, Follow
 
 
 class PostForm(forms.Form):
@@ -27,7 +27,15 @@ def users(request, id):
     user = User.objects.get(id=id)
     if user is None:
         return Http404(f"Could not find user with id of: {id}")
-    return render(request, "network/view_user.html", {"user": user})
+    if request.user.id != id:
+        is_following = request.user.following.filter(to__id=user.id).exists()
+    return render(request, "network/view_user.html", {
+        "id": user.id,
+        "username": user.username,
+        "followers": user.followers.all(),
+        "following": user.following.all(),
+        "is_following": is_following 
+        })
 
 
 @login_required
@@ -96,6 +104,26 @@ def likes(request):
         # remove from database, which will remove from post likes too?
         like.delete()
         return HttpResponse(status=200)
+
+
+def following(request, id):
+    user = User.objects.get(id=id)
+    if user is None:
+        return Http404(f"Could not find user id of: {id}")
+    data = loads(request.body)
+    message = None 
+    if not data.get("following_state"): 
+        # follow the user
+        # check if already following the user
+        if request.user.following.filter(to__id=user.id).exists():
+            return HttpResponse(409)
+        Follow.objects.create(who=request.user, to=user)
+        message = "Followed the user"
+    elif data.get("following_state"):
+        # unfollow the user
+        request.user.following.filter(to__id=user.id).delete()
+        message = "Unfollowed the user"
+    return HttpResponse(message, status=200)
 
 
 def login_view(request):
