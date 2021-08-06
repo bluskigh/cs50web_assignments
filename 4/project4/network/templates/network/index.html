@@ -24,31 +24,14 @@
 {% include "network/posts_include.html" %}
 
 <script>
-    var information = [];
-    var  postsContainer;
-
-    window.onpopstate = function(event) {
-
-        console.log("Below is the state: ")
-        console.log(event.state)
-        showPosts(event.state.information)
-    }
+    var postsContainer, nextButton, previousButton;
+    // default page 0 of all posts
+    var page = 1;
 
     function clearPosts() {
 
         while(postsContainer.children.length) {
             postsContainer.removeChild(postsContainer.children[0])
-        }
-    }
-
-    function showPosts(information_array) {
-
-        console.log(information_array)
-        clearPosts()
-        for (const information in information_array) {
-            console.log(information)
-            // might have to change to insertBefore
-            createPosts(information)
         }
     }
 
@@ -85,8 +68,6 @@
 
     function createPost(post_information) {
 
-        // inserting the information, at index because the array of posts is in reverse chronological order
-        information.splice(0, 0, post_information)
         // creating the post
         const tempContainer = document.createElement("div");
         tempContainer.classList.add("post")
@@ -129,7 +110,20 @@
         // postsContainer.insertBefore(tempContainer, postsContainer.firstChild)
     } 
 
-
+    function morePosts() {
+        fetch(`/is_more?page=${page}`)
+        .then(async r => await r.json())
+        .then(r => {
+            if (r.result) {
+                // displaying the button
+                nextButton.classList.remove("hidden");
+                // TODO what if the user removes hidden in the html inspector and a request is sent 
+                // to get more posts, constraint for that
+            } else {
+                nextButton.classList.add("hidden");
+            }
+        }).catch(e => console.log(e))
+    }
 
     document.addEventListener("DOMContentLoaded", function() {
 
@@ -142,17 +136,15 @@
         postsContainer = document.querySelector("#posts"); 
         const userId = postsContainer.dataset.userId;
         const addPostForm = document.querySelector("#add-post-form");
-        // PREVIOUS AND NEXT BUTTON FUNCTIONALITY
-        var start = 0;
-
 
         // when the document loads get all the posts and render in the postsContainer
-        fetch(`/posts?page=${start}`)
+        fetch(`/posts?page=${page}`)
         .then(async r => await r.json())
         .then(r => {
             for (const post of r.posts) {
                 createPost(post)
             }
+            // after done adding post when the document first loads, then push the current state to the history 
         }).catch(e => {console.log(e)})
 
         addPostForm.addEventListener("submit", function(e) {
@@ -179,40 +171,51 @@
             })
         })
 
+        // onload of the document check if there are most posts to be displayed 
+        morePosts()
+
 
         // when the document loads we want to determine whether to show the previous and next button
         // based on current functionality we are not checking for previous since on view load
         // we are passing the posts therefore the start is 0 and end is 10
 
-        const nextButton = document.querySelector("#next");
-        const previousButton = document.querySelector("#previous");
+        nextButton = document.querySelector("#next");
+        previousButton = document.querySelector("#previous");
 
         nextButton.addEventListener("click", function() {
 
             // load all the posts that are on page + 1 from current
-            start += 1;
-            fetch(`/posts?page=${start+1}`)
+            page += 1;
+            fetch(`/posts?page=${page}`)
             .then(async r => await r.json())
             .then(r => {
-                console.log("going to push: ", information)
-                // TODO for now just show the state change in the url, in future put ul list with 1, 2, 3 etc. when clicked on 1 2 3 use history api to pop current state and go(2) etc.
-                history.pushState({information: information}, '', `page${start}`)
-                information = [];
-                // remove all the children
+                if (page >= 1) {
+                    previousButton.classList.toggle("hidden")
+                }
+                morePosts()
                 clearPosts()
+                for (const post of r.posts) {
+                    createPost(post)
+                }
             }).catch(e => console.log(e))
         })
+        previousButton.addEventListener("click", function() {
 
-        fetch("/is_more?end=10")
-        .then(async r => await r.json())
-        .then(r => {
-            if (r.result) {
-                // displaying the button
-                nextButton.classList.remove("hidden");
-                // TODO what if the user removes hidden in the html inspector and a request is sent 
-                // to get more posts, constraint for that
-            }
-        }).catch(e => console.log(e))
+            page -= 1;
+            fetch(`/posts?page=${page}`)
+            .then(async r => await r.json())
+            .then(r => {
+                if (page == 1) {
+                    previousButton.classList.add("hidden")
+                }
+                morePosts()
+                clearPosts()
+                for (const post of r.posts) {
+                    createPost(post)
+                }
+            }).catch(e => console.error(e))
+        })
+
 
         // EDIT FORM 
         const editForm = document.querySelector("#edit-form");

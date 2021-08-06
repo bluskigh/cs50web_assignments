@@ -22,29 +22,19 @@ class PostForm(forms.Form):
 def get_posts(request, posts):
     """ Returns 10 post depending on the start and end that is found in the
     url arguments"""
-    current_page = request.GET.get("page") or -1
-    current_page = int(current_page)
-    if current_page == 0:
-        current_page = -1
-    elif current_page > 0:
-        current_page *= -10
-    end = current_page - 9
-    posts = list(posts)
-    # first page
-    if current_page == -1:
-        posts = posts[end:]
-    else:
-        posts = posts[end:current_page]
-    return reverse_chronological_order(posts)
-    # return reverse_chronological_order(post[start:end])
+    page = int(request.GET.get("page") or 1) - 1
+    start = page * 10
+    end = start + 10
+    posts = reverse_chronological_order(posts)
+    return posts[start:end]
 
 
 def is_more_to_load(request):
     # the end of the current user, ex currently viewing 0 - 10, in order
     # for next to show we want to know if there is more than the current
     # end... 10, are there 11 posts? if so show next button (return true)
-    user_end = request.GET.get("end") or 10
-    return JsonResponse({"result": Post.objects.count() - int(user_end) > 0})
+    page = request.GET.get("page") or 1 
+    return JsonResponse({"result": Post.objects.count() - int(page)*10 > 0})
 
 
 def reverse_chronological_order(posts):
