@@ -4,6 +4,8 @@ from django.db import models
 
 class User(AbstractUser):
     pass
+    # following = models.ForeignKey('self', on_delete=models.CASCADE, 
+            related_name="followers")
 
 
 class Like(models.Model):
@@ -34,4 +36,5 @@ class Post(models.Model):
 
     def clean(self):
         return {"id": self.id, "title": self.title, "text": self.text, 
-                "likes": len(self.likes.all()), "created": self.created}
+                "likes": len(self.likes.all()), "created": self.created, 
+                "user_id": self.user.id, "username": self.user.username}

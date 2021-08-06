@@ -29,3 +29,9 @@ textarea {
 .editing form {
     display: initial;
 }
+.heart {
+    filter: invert(100%);
+}
+.liked {
+    filter: invert(0%);
+}

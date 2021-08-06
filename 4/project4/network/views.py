@@ -19,7 +19,15 @@ class PostForm(forms.Form):
 
 def index(request):
     return render(request, "network/index.html", {"new_post_form": PostForm(),
-        "posts": Post.objects.all(), "edit_post_form": PostForm()})
+        "posts": [post.clean() for post in Post.objects.all()], "edit_post_form": PostForm()})
+
+
+@login_required
+def users(request, id):
+    user = User.objects.get(id=id)
+    if user is None:
+        return Http404(f"Could not find user with id of: {id}")
+    return render(request, "network/view_user.html", {"user": user})
 
 
 @login_required
@@ -65,6 +73,29 @@ def posts(request):
                 return HttpResponse("Server Error", status=500)
     # TODO change this 
     return Http404('You are not supposed to get here.')
+
+
+def likes(request):
+    id = loads(request.body).get("post_id")
+    if id is None:
+            return HttpResponse("Bad Request", 300)
+    post = Post.objects.get(id=id)
+    if post is None:
+        return Http404(f"Could not find a post with id of: {id}")
+    if request.method == "POST":
+        # check if the user already liked
+        # using field clause = WHERE clause in SQL -> https://docs.djangoproject.com/en/3.2/ref/models/querysets/#field-lookups
+        if post.likes.filter(user__id=request.user.id).exists():
+            return HttpResponse(status=409)
+        # add a like that belongs to the user
+        post.likes.create(user=request.user)
+        return HttpResponse(status=200)
+    elif request.method == "DELETE":
+        # remove from liked
+        like = post.likes.get(user__id=request.user.id)
+        # remove from database, which will remove from post likes too?
+        like.delete()
+        return HttpResponse(status=200)
 
 
 def login_view(request):
