@@ -11,6 +11,13 @@
 </form>
 {% endif %}
 
+{% if request.user.id == id %}
+<h2>Your posts</h2>
+{% else %}
+<h2>{{ username }}'s posts</h2>
+{% endif %}
+{% include "network/posts_include.html" %}
+
 <script>
     const followForm = document.querySelector("#follow-form");
     followForm.addEventListener("submit", function(e) {
@@ -21,11 +28,7 @@
             method: following ? "DELETE" : "POST",
             mode: "same-origin",
             headers: new Headers({
-                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
-                "Content-Type": "application/json"
-            }),
-            body: JSON.stringify({
-                following_state: following
+                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
             })
         })
         .then(r => {

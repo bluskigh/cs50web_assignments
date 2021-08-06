@@ -3,7 +3,7 @@
 
 {% block body %}
 <h1>All Posts</h1>
-{% if request.is_authenticated %}
+{% if request.user.is_authenticated %}
 <form action="posts" id="add-post-form" method="POST">
     {% csrf_token %}
     <h2>New Post</h2>
@@ -21,28 +21,7 @@
 </form>
 {% endif %}
 
-{% load network_tags %}
-<section id="posts">
-{% if posts %}
-    {% for post in posts %}
-    <div class="post" data-id={{ post.id }}>
-        <div class="post-content">
-            {% if post.user_id == request.user.id %}
-            <button class="edit">Edit</button>
-            {% else %}
-            <a href="{% url 'users' post.user_id %}">By {{ post.username }}</a>
-            {% endif %}
-            <h3>{{ post.title }}</h3>
-            <p>{{ post.text }}</p>
-            <span><img class="heart {% if post.id|liked:request.user.id %}liked{% endif %}" src="{% static 'network/images/heart.svg' %}" height="15px" width="15px"> <p>{{ post.likes }}</p></span>
-            <a href="#">Comment</a>
-        </div>
-    </div>
-    {% endfor %}
-{% else %}
-    <p>There are no posts.</p>
-{% endif %}
-</section>
+{% include "network/posts_include.html" %}
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -50,22 +29,22 @@
         function like(e) {
 
             const post_id = this.parentElement.parentElement.parentElement.dataset.id;
-            var current_state = this.classList.contains("liked");
+            var currentState = this.classList.contains("liked");
             fetch("/likes", {
 
-                method: !current_state ? "POST" : "DELETE",
+                method: !currentState? "POST" : "DELETE",
                 mode: "same-origin",
                 headers: new Headers({
 
                     "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken").value,
                     "Content-Type": "application/json"
                 }),
-                body: JSON.stringify({post_id, liked: !current_state})
+                body: JSON.stringify({post_id, liked: !currentState})
             })
             .then(r => {
 
                 const nextSibling = this.nextElementSibling;
-                if (!current_state == true) {
+                if (!currentState == true) {
                     // liked
                     nextSibling.innerText = parseInt(nextSibling.innerText) + 1;
                     this.classList.add("liked")
@@ -84,6 +63,7 @@
         })
 
         const postsContainer = document.querySelector("#posts"); 
+        const userId = postsContainer.dataset.userId;
         const addPostForm = document.querySelector("#add-post-form");
         addPostForm.addEventListener("submit", function(e) {
 
@@ -112,10 +92,9 @@
                 tempContainer.dataset.id = r.id;
                 const tempContentContainer = document.createElement("div");
                 tempContentContainer.classList.add("post-content")
-                if (r.is_owner) {
-                    const editButton = document.createElement("button");
-                    editButton.classList.add("edit")
-                }
+                const editButton = document.createElement("button");
+                editButton.classList.add("edit")
+                editButton.innerText = "Edit"
                 const header = document.createElement("h3");
                 header.innerText = r.title;
                 const paragraph = document.createElement("p");
@@ -132,24 +111,77 @@
                 tempP.style.display = "inline-block";
                 spanContainer.appendChild(heart)
                 spanContainer.appendChild(tempP)
+                // for created or updated 
+                const time = document.createElement("time");
+                time.setAttribute("datetime", r.created)
+                time.innerText = (r.updated ? "Updated: " : "") + r.created;
                 const comment = document.createElement("a");
                 comment.innerText = "Comment";
+                tempContentContainer.appendChild(editButton)
                 tempContentContainer.appendChild(header)
                 tempContentContainer.appendChild(paragraph)
                 tempContentContainer.appendChild(spanContainer)
+                tempContentContainer.appendChild(time)
                 tempContentContainer.appendChild(comment)
                 tempContainer.appendChild(tempContentContainer)
-                postsContainer.appendChild(tempContainer)
+                postsContainer.insertBefore(tempContainer, postsContainer.firstChild)
             })
         })
 
+        // PREVIOUS AND NEXT BUTTON FUNCTIONALITY
+        var start = 0;
+        var end = 10;
+
+        // when the document loads we want to determine whether to show the previous and next button
+        // based on current functionality we are not checking for previous since on view load
+        // we are passing the posts therefore the start is 0 and end is 10
+
+        const nextButton = document.querySelector("#next");
+        const previousButton = document.querySelector("#previous");
+
+        nextButton.addEventListener("click", function() {
+            fetch("/posts?start=0")
+            .then(async r => await r.json())
+            .then(r => {
+                console.log(r)
+            }).catch(e => console.log(e))
+        })
+
+        fetch("/is_more?end=10")
+        .then(async r => await r.json())
+        .then(r => {
+            if (r.result) {
+                // displaying the button
+                nextButton.classList.remove("hidden");
+                // TODO what if the user removes hidden in the html inspector and a request is sent 
+                // to get more posts, constraint for that
+            }
+        }).catch(e => console.log(e))
+
+        // EDIT FORM 
         const editForm = document.querySelector("#edit-form");
         const editTitleInput = editForm.querySelector("#id_title");
         const editTextInput = editForm.querySelector("#id_text");
 
+        const hideForm = () => {
+            // remove editing class
+            editForm.parentElement.classList.toggle("editing");
+
+            // move this form from the post to the body and hide
+            document.querySelector("body").appendChild(editForm);
+
+            // erasing the input since its not going to belong to anything anymore, when it belongs
+            // to a post, then it will be filled with the posts information.
+            editTitleInput.value = null;
+            editTextInput.value = null;
+        };
+
         editForm.addEventListener("submit", function(e) {
 
             e.preventDefault();
+            // TODO: check on change of the edit form inputs, if changed after Edit ON THE FORM
+            // button has been clicked then patch, otherwise if no edit was made do not fetch
+            // to server.
             fetch(`/posts?id=${this.parentElement.dataset.id}`, {
                 method: "PATCH",
                 mode: "same-origin",  // used so that I do not send CSRF token anywher else. good practice. https://docs.djangoproject.com/en/3.2/ref/csrf/#setting-the-token-on-the-ajax-request 
@@ -163,26 +195,23 @@
                 })
             })
             .then(r => {
-                // remove editing class
-                this.parentElement.classList.toggle("editing");
-
-                // move this form from the post to the body and hide
-                document.querySelector("body").appendChild(this);
-
+                // success, edit the text of the post and hide this form
                 // replacing the text of the post title and text with the patched version
-                this.parentElement.querySelector("h3").innerText = editTitleInput.value;
-                this.parentElement.querySelector("p").innerText = editTextInput.value;
-
-                // erasing the input since its not going to belong to anything anymore, when it belongs
-                // to a post, then it will be filled with the posts information.
-                editTitleInput.value = null;
-                editTextInput.value = null;
+                editForm.parentElement.querySelector("h3").innerText = editTitleInput.value;
+                editForm.parentElement.querySelector("p").innerText = editTextInput.value;
+                hideForm()
             }).catch(e => {console.log(e);})
         })
 
         document.querySelectorAll(".edit").forEach(item => {
 
             item.addEventListener("click", function() {
+
+                // if the edit form is in a post still, then hide the form, so that the post
+                // that was clicked can use it.
+                if (editForm.parentElement.classList.contains("post")) {
+                    hideForm()
+                }
 
                 const parentElement = this.parentElement.parentElement;
 

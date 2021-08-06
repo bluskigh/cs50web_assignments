@@ -1,0 +1,26 @@
+{% load static %}
+{% load network_tags %}
+<section id="posts" data-user-id={{request.user.id}}>
+{% if posts %}
+    {% for post in posts %}
+    <div class="post" data-id={{ post.id }}>
+        <div class="post-content">
+            {% if post.user_id == request.user.id %}
+            <button class="edit">Edit</button>
+            {% else %}
+            <a href="{% url 'users' post.user_id %}">By {{ post.username }}</a>
+            {% endif %}
+            <h3>{{ post.title }}</h3>
+            <p>{{ post.text }}</p>
+            <span><img class="heart {% if post.id|liked:request.user.id %}liked{% endif %}" src="{% static 'network/images/heart.svg' %}" height="15px" width="15px"> <p>{{ post.likes }}</p></span>
+            <time datetime="{{ post.created }}">{% if post.updated %}<strong>Updated: </strong>{% endif %}{{ post.created }}</time>
+            <a href="#">Comment</a>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <p>There are no posts.</p>
+{% endif %}
+<button class="hidden" id="previous">Previous</button>
+<button class="hidden" id="next">Next</button>
+</section>

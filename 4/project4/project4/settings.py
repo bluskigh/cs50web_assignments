@@ -35,6 +35,8 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    # using database-backed session, will create the single database 
+    # table that stores session data https://docs.djangoproject.com/en/3.2/topics/http/sessions/#using-database-backed-sessions
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
@@ -42,6 +44,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # since this is activated the request object will contain a session
+    # attribute which is a dict https://docs.djangoproject.com/en/3.2/topics/http/sessions/#using-sessions-in-views
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

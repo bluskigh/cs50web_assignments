@@ -42,3 +42,11 @@ textarea {
 .following::after {
     content: "Following";
 }
+
+time {
+    color: gray;
+}
+
+.hidden {
+    display: none;
+}

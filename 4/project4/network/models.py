@@ -1,9 +1,11 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 
 
 class User(AbstractUser):
     pass
+
 
 class Follow(models.Model):
     # the person that is following
@@ -38,9 +40,13 @@ class Post(models.Model):
     # the likes the post has
     likes = models.ManyToManyField(Like, blank=True, related_name="post")
     # when the post was created
-    created = models.DateTimeField(auto_now=True)
+    # before: datetime.now() <- error "naive datetime" fixed with -> https://stackoverflow.com/questions/18622007/runtimewarning-datetimefield-received-a-naive-datetime
+    created = models.DateTimeField(default=timezone.now(), auto_now=False)
+    # determines if the user updated the post since its creation
+    updated = models.BooleanField(default=False)
 
     def clean(self):
         return {"id": self.id, "title": self.title, "text": self.text, 
                 "likes": len(self.likes.all()), "created": self.created, 
-                "user_id": self.user.id, "username": self.user.username}
+                "user_id": self.user.id, "username": self.user.username,
+                "updated": self.updated}
