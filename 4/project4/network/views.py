@@ -33,8 +33,13 @@ def is_more_to_load(request):
     # the end of the current user, ex currently viewing 0 - 10, in order
     # for next to show we want to know if there is more than the current
     # end... 10, are there 11 posts? if so show next button (return true)
+    posts = None
+    if request.GET.get("following"):
+        posts = request.user.following.count()
+    else:
+        posts = Post.objects.count()
     page = request.GET.get("page") or 1 
-    return JsonResponse({"result": Post.objects.count() - int(page)*10 > 0})
+    return JsonResponse({"result": posts - int(page)*10 > 0})
 
 
 def reverse_chronological_order(posts):
@@ -155,9 +160,11 @@ def following(request, id=None):
             for post in reverse_chronological_order(list(
                 following.to.posts.all())[-4:-1]):
                 posts.append(post)
-        return render(request, "network/view_following.html", {
-            "posts": posts
-            })
+        if request.GET.get("page") is None:
+            return render(request, "network/view_following.html", {
+                "posts": posts})
+        else:
+            return JsonResponse({"posts": posts})
     # otherwise might be a delete or post request
     user = User.objects.get(id=id)
     if user is None:
