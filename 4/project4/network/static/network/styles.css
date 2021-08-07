@@ -1,3 +1,11 @@
+html, body {
+    scroll-behavior: smooth;
+}
+html, body, p, h1, h2, h3, h4, ul, li {
+    margin: 0;
+    padding: 0;
+}
+
 form {
     border: 1px solid gray;
     display: flex;
@@ -29,11 +37,32 @@ textarea {
 .editing form {
     display: initial;
 }
-.heart {
-    filter: invert(100%);
+.svg{
+    transition: .3s ease; 
+    cursor: pointer;
 }
-.liked {
-    filter: invert(0%);
+.svg .path2 {
+    fill: black;
+}
+.svg-active .path2 {
+    fill: red;
+}
+.svg:hover {
+    fill: red;
+}
+.svg-active:hover {
+    fill: black;
+}
+.options {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 25%;
+    padding: 0;
+    margin: 0;
+}
+.options span {
+    margin-right: 1em;
 }
 
 .follow::after {

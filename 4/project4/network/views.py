@@ -82,11 +82,14 @@ def posts(request):
     if request.method == "GET":
         # if attempting to get a specific post 
         id = request.GET.get("id")
-        if id:
+        userid = request.GET.get("userid")
+        if id and userid is None:
             id = int(id)
             post = Post.objects.get(id=id)
             return JsonResponse({"title": post.title, "text": post.text})
         # otherwise return all posts
+        elif userid:
+            return JsonResponse({"posts": get_posts(request, User.objects.get(id=int(userid)).posts.all())})
         else:
             return JsonResponse({"posts":  get_posts(request, 
                 Post.objects.all()), "userid": request.user.id})
@@ -131,11 +134,12 @@ def posts(request):
 def likes(request):
     id = loads(request.body).get("post_id")
     if id is None:
-            return HttpResponse("Bad Request", 300)
+            return HttpResponse("Bad Request", status=300)
     post = Post.objects.get(id=id)
     if post is None:
         return Http404(f"Could not find a post with id of: {id}")
     if request.method == "POST":
+        print(f"The user wants to add a like to post: {post.title}")
         # check if the user already liked
         # using field clause = WHERE clause in SQL -> https://docs.djangoproject.com/en/3.2/ref/models/querysets/#field-lookups
         if post.likes.filter(user__id=request.user.id).exists():
@@ -146,6 +150,7 @@ def likes(request):
     elif request.method == "DELETE":
         # remove from liked
         like = post.likes.get(user__id=request.user.id)
+        print(f"The user wants a remove a like from: {post.title}")
         # remove from database, which will remove from post likes too?
         like.delete()
         return HttpResponse(status=200)
@@ -161,8 +166,7 @@ def following(request, id=None):
                 following.to.posts.all())[-4:-1]):
                 posts.append(post)
         if request.GET.get("page") is None:
-            return render(request, "network/view_following.html", {
-                "posts": posts})
+            return render(request, "network/view_following.html")
         else:
             return JsonResponse({"posts": posts})
     # otherwise might be a delete or post request

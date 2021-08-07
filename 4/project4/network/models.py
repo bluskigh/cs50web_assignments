@@ -20,6 +20,8 @@ class Like(models.Model):
     # who the like is by
     user = models.ForeignKey(User, on_delete=models.CASCADE,
             related_name="likes")
+    def clean(self):
+        return self.user.id
 
 
 class Comment(models.Model):
@@ -47,6 +49,7 @@ class Post(models.Model):
 
     def clean(self):
         return {"id": self.id, "title": self.title, "text": self.text, 
-                "likes": len(self.likes.all()), "created": self.created, 
+                "likes": [like.clean() for like in self.likes.all()], 
+                "created": self.created.now().strftime("%y-%m-%d %a %H:%M"), 
                 "user_id": self.user.id, "username": self.user.username,
                 "updated": self.updated}
