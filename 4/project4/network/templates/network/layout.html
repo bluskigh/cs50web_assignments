@@ -1,4 +1,5 @@
 {% load static %}
+{% load network_tags %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -8,32 +9,31 @@
     </head>
     <body>
 
-        <nav class="navbar navbar-expand-lg navbar-light bg-light" data-user-id="{{ request.user.id }}">
-            <a class="navbar-brand" href="#">Network</a>
-          
-            <div>
-              <ul class="navbar-nav mr-auto">
+        <nav class="" data-user-id="{{ request.user.id }}">
+            <div class="navigation-container">
+              <h1 class="company-label">Network</h1>
+              <ul class="">
                 {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'users' request.user.id %}"><strong>{{ user.username }}</strong></a>
+                    <li class="">
+                        <a class="{% if request.path == '/users/'|concat:request.user.id %}current{% endif %}" href="{% url 'users' request.user.id %}"><strong>{{ user.username }}</strong></a>
                     </li>
                 {% endif %}
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'index' %}">All Posts</a>
+                <li class="">
+                  <a class="{% if request.path == '/' %}current{% endif %}" href="{% url 'index' %}">All Posts</a>
                 </li>
                 {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'following' %}">Following</a>
+                    <li class="">
+                        <a class="{% if request.path == '/following' %}current{% endif %}" href="{% url 'following' %}">Following</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+                        <a class="" href="{% url 'logout' %}">Log Out</a>
                     </li>
                 {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">Log In</a>
+                    <li class="">
+                        <a class="{% if request.path == '/login' %}current{% endif %}" href="{% url 'login' %}">Log In</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'register' %}">Register</a>
+                    <li class="">
+                        <a class="{% if request.path == '/register' %}current{% endif %}" href="{% url 'register' %}">Register</a>
                     </li>
                 {% endif %}
               </ul>

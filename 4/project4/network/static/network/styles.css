@@ -6,6 +6,56 @@ html, body, p, h1, h2, h3, h4, ul, li {
     padding: 0;
 }
 
+nav {
+    position: relative;
+    width: 100%;
+    background: black;
+    color: white;
+}
+.company-label {
+    padding: 1em .5em;
+    color: white;
+    font-weight: 900;
+}
+.navigation-container {
+    display: flex;
+    align-items: center;
+}
+.navigation-container li {
+    display: inline-block;
+    margin: 0 .25em;
+}
+a {
+    color: white;
+    text-decoration: none;
+}
+a:hover {
+    color: darkgrey;
+    text-decoration: underline;
+}
+.current {
+    text-decoration: underline;
+}
+
+input, textarea {
+    border: 1px solid black;
+    color: black;
+    padding: .5em;
+    font-family: Arial, Helvetica, sans-serif;
+}
+button {
+    border: none;
+    color: white;
+    background: black;
+    padding: .5em;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: background .5s ease;
+}
+button:hover {
+    background: rgb(43, 41, 41);
+}
+
 form {
     border: 1px solid gray;
     display: flex;
@@ -20,6 +70,8 @@ textarea {
     min-height: 5em;
 }
 .post {
+    background: black;
+    color: white;
     margin: .5em 0;
     border: 1px solid gray;
     padding: 1em .5em;
@@ -27,10 +79,25 @@ textarea {
     display: flex;
     flex-direction: column;
 }
+.post a {
+    text-decoration: underline;
+}
+.post button:first-child {
+    background: white;
+    color: black; 
+    padding: .3em 2em;
+    margin-right: 1em;
+}
+
 
 .hidden {
     display: none;
 }
+#edit-form {
+    background: white;
+    color: black;
+}
+#edit-form button {width: 100%;}
 .editing div {
     display: none;
 }
@@ -42,7 +109,7 @@ textarea {
     cursor: pointer;
 }
 .svg .path2 {
-    fill: black;
+    fill: white;
 }
 .svg-active .path2 {
     fill: red;

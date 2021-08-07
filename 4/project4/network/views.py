@@ -22,7 +22,7 @@ class PostForm(forms.Form):
 def get_posts(request, posts):
     """ Returns 10 post depending on the start and end that is found in the
     url arguments"""
-    page = int(request.GET.get("page") or 1) - 1
+    page = int(request.GET.get("page") or 0)
     start = page * 10
     end = start + 10
     posts = reverse_chronological_order(posts)
@@ -122,6 +122,7 @@ def posts(request):
                 post.title = title
             if text is not None and (text != post.text):
                 post.text = text
+            post.updated = True
             post.save()
             return HttpResponse("Updated", status=200)
         except Exception as e:

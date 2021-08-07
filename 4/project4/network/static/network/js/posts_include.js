@@ -1,7 +1,7 @@
 var postsContainer, nextButton, previousButton, editForm, editTitleInput, editTextInput, userid;
 
 // default page 0 of all posts
-var page = 1;
+var page = 0;
 
 function clearPosts() {
 
@@ -157,22 +157,23 @@ document.addEventListener("DOMContentLoaded", function() {
     postsContainer = document.querySelector("#posts"); 
 
     var path = document.location.pathname == "/"; 
-    if (document.location.pathname.indexOf("users")) {
+    if (document.location.pathname.indexOf("users") == 1) {
         var id = document.location.pathname.split('/');
         id = id[id.length-1];
         path = `/posts?userid=${id}`
     } else if (path) {
-        path = "/posts?page=0"
+        path = "/posts"
     } else {
         path = "/following"
     }
+    const get_path = () => `${path}?page=${page}`;
 
     editForm = document.querySelector("#edit-form");
     editTitleInput = editForm.querySelector("#id_title");
     editTextInput = editForm.querySelector("#id_text");
 
     // get all the posts and render in the postsContainer
-    fetch(path)
+    fetch(get_path())
     .then(async r => await r.json())
     .then(r => {
         for (const post of r.posts) {
@@ -192,7 +193,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // load all the posts that are on page + 1 from current
         page += 1;
-        fetch(`/${path}?page=${page}`)
+        fetch(get_path())
         .then(async r => await r.json())
         .then(r => {
             if (page >= 1 && previousButton.classList.contains("hidden")) {
@@ -209,10 +210,10 @@ document.addEventListener("DOMContentLoaded", function() {
     previousButton.addEventListener("click", function() {
 
         page -= 1;
-        fetch(`/${path}?page=${page}`)
+        fetch(get_path())
         .then(async r => await r.json())
         .then(r => {
-            if (page == 1 && previousButton.classList.contains("hidden") == false) {
+            if (page == 0 && previousButton.classList.contains("hidden") == false) {
                 previousButton.classList.add("hidden")
             }
             morePosts()

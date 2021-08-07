@@ -50,6 +50,6 @@ class Post(models.Model):
     def clean(self):
         return {"id": self.id, "title": self.title, "text": self.text, 
                 "likes": [like.clean() for like in self.likes.all()], 
-                "created": self.created.now().strftime("%y-%m-%d %a %H:%M"), 
+                "created": self.created.strftime("%y-%m-%d %a %H:%M"), 
                 "user_id": self.user.id, "username": self.user.username,
                 "updated": self.updated}

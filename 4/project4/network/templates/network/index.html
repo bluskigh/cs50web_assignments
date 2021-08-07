@@ -1,8 +1,9 @@
 {% extends "network/layout.html" %}
 {% load static %}
 
+{% block title %}All Posts / Social Network{% endblock %}
+
 {% block body %}
-<h1>All Posts</h1>
 {% if request.user.is_authenticated %}
 <form action="posts" id="add-post-form" method="POST">
     {% csrf_token %}

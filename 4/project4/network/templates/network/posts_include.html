@@ -1,7 +1,7 @@
 {% load static %}
 <form id="edit-form" class="hidden" action="#" method="POST">
     {% csrf_token %}
-    Edit Post
+    <h3>Edit Post</h3>
     {{ edit_post_form.title }}
     {{ edit_post_form.text }}
     <button type="submit">Edit</button>
