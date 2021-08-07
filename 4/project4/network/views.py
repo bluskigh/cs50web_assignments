@@ -76,13 +76,15 @@ def users(request, id):
 def posts(request):
     if request.method == "GET":
         # if attempting to get a specific post 
-        if request.GET.get("id"):
-            post = Post.objects.get(id=request.GET.get("id"))
+        id = request.GET.get("id")
+        if id:
+            id = int(id)
+            post = Post.objects.get(id=id)
             return JsonResponse({"title": post.title, "text": post.text})
         # otherwise return all posts
         else:
             return JsonResponse({"posts":  get_posts(request, 
-                Post.objects.all())})
+                Post.objects.all()), "userid": request.user.id})
     elif request.method == "POST":
         data = loads(request.body) 
         if data.get("title") is None or data.get("text") is None:

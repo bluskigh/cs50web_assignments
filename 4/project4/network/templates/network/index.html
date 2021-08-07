@@ -66,7 +66,7 @@
 
     }
 
-    function createPost(post_information) {
+    function createPost(post_information, form=null, userid=null) {
 
         // creating the post
         const tempContainer = document.createElement("div");
@@ -77,6 +77,9 @@
         const editButton = document.createElement("button");
         editButton.classList.add("edit")
         editButton.innerText = "Edit"
+        const who = document.createElement("a");
+        who.setAttribute('href', `/users/${post_information.user_id}`)
+        who.innerText = `By ${post_information.username}`;
         const header = document.createElement("h3");
         header.innerText = post_information.title;
         const paragraph = document.createElement("p");
@@ -99,18 +102,25 @@
         time.innerText = (post_information.updated ? "Updated: " : "") + post_information.created;
         const comment = document.createElement("a");
         comment.innerText = "Comment";
-        tempContentContainer.appendChild(editButton)
+        if (parseInt(post_information.user_id) == userid) {
+            tempContentContainer.appendChild(editButton)
+        }
+        tempContentContainer.appendChild(who)
         tempContentContainer.appendChild(header)
         tempContentContainer.appendChild(paragraph)
         tempContentContainer.appendChild(spanContainer)
         tempContentContainer.appendChild(time)
         tempContentContainer.appendChild(comment)
         tempContainer.appendChild(tempContentContainer)
-        postsContainer.appendChild(tempContainer)
-        // postsContainer.insertBefore(tempContainer, postsContainer.firstChild)
+        if (form) {
+            postsContainer.insertBefore(tempContainer, postsContainer.firstChild)
+        } else {
+            postsContainer.appendChild(tempContainer)
+        }
     } 
 
     function morePosts() {
+
         fetch(`/is_more?page=${page}`)
         .then(async r => await r.json())
         .then(r => {
@@ -127,7 +137,6 @@
 
     document.addEventListener("DOMContentLoaded", function() {
 
-
         document.querySelectorAll(".heart").forEach(item => {
 
             item.addEventListener("click", like);
@@ -142,7 +151,7 @@
         .then(async r => await r.json())
         .then(r => {
             for (const post of r.posts) {
-                createPost(post)
+                createPost(post, null, r.userid)
             }
             // after done adding post when the document first loads, then push the current state to the history 
         }).catch(e => {console.log(e)})
@@ -167,7 +176,7 @@
             })
             .then(async r => await r.json())
             .then(r => {
-                createPost(r)
+                createPost(r, true)
             })
         })
 
@@ -189,8 +198,8 @@
             fetch(`/posts?page=${page}`)
             .then(async r => await r.json())
             .then(r => {
-                if (page >= 1) {
-                    previousButton.classList.toggle("hidden")
+                if (page >= 1 && previousButton.classList.contains("hidden")) {
+                    previousButton.classList.remove("hidden")
                 }
                 morePosts()
                 clearPosts()
@@ -205,7 +214,7 @@
             fetch(`/posts?page=${page}`)
             .then(async r => await r.json())
             .then(r => {
-                if (page == 1) {
+                if (page == 1 && previousButton.classList.contains("hidden") == false) {
                     previousButton.classList.add("hidden")
                 }
                 morePosts()
