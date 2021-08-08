@@ -93,30 +93,17 @@ function createPost(post_information, form=null) {
     if (parseInt(post_information.user_id) == userid) {
         tempContentContainer.appendChild(editButton)
         editButton.addEventListener("click", function() {
-
             // if the edit form is in a post still, then hide the form, so that the post
             // that was clicked can use it.
             if (editForm.parentElement.classList.contains("post")) {
                 hideForm()
             }
-
             const parentElement = this.parentElement.parentElement;
-
             // add editing class
             parentElement.classList.toggle("editing");
-
-            const content = parentElement.querySelector(".post-content");
-            // TODO add an animation where the content is inactive when we are trying to load
-            // the post data, also disable the inputs
             parentElement.appendChild(editForm);
-
-            fetch(`/posts?id=${parentElement.dataset.id}`)
-            .then(async r => await r.json())
-            .then(r => {
-                // information of post recieved, set form edit inputs value to the information recieved.
-                editTitleInput.value = r.title;
-                editTextInput.value = r.text;
-            }).catch(e => {console.log(e);})
+            editTitleInput.value = this.parentElement.querySelector("h3").innerText;
+            editTextInput.value = this.parentElement.querySelector("p").innerText;
         })
     }
     tempContentContainer.appendChild(who)
@@ -132,29 +119,22 @@ function createPost(post_information, form=null) {
     }
 } 
 
-var path = document.location.pathname == "/" || document.location.pathname.indexOf("users") >= 0; 
-const onUserPage = () => document.location.pathname.indexOf("users") == 1 ? "&userid=" + getUserId() : "";
+
 const proxy = new Proxy(document.location.pathname.split('/'), {
     get(target, property) {
         return target[target.length+parseInt(property)]
     }
 })
 const getUserId = () => proxy[-1];
+const onUserPage = () => document.location.pathname.indexOf("users") == 1 ? "&userid=" + getUserId() : "";
 
-function morePosts() {
+function morePosts(isMore) {
 
-    fetch(`/is_more?page=${page}${document.location.pathname == '/following' ? "&following=True" : ""}${onUserPage()}`)
-    .then(async r => await r.json())
-    .then(r => {
-        if (r.result) {
-            // displaying the button
-            nextButton.classList.remove("hidden");
-            // TODO what if the user removes hidden in the html inspector and a request is sent 
-            // to get more posts, constraint for that
-        } else {
-            nextButton.classList.add("hidden");
-        }
-    }).catch(e => console.log(e))
+    if (isMore) {
+        nextButton.classList.remove("hidden");
+    } else {
+        nextButton.classList.add("hidden");
+    }
 }
 
 ///
@@ -165,68 +145,50 @@ document.addEventListener("DOMContentLoaded", function() {
     userid = parseInt(document.querySelector("nav").dataset.userId);
     postsContainer = document.querySelector("#posts"); 
 
-    if (path) {
-        path = "/posts"
-    } else {
-        path = "/following"
-    }
-
-    const get_path = () => `${path}?page=${page}${onUserPage()}`;
+    const getPath = () => `/posts?page=${page}${onUserPage()}${document.location.pathname == '/following' ? "&following=True" : ""}`;
 
     editForm = document.querySelector("#edit-form");
     editTitleInput = editForm.querySelector("#id_title");
     editTextInput = editForm.querySelector("#id_text");
 
-    // get all the posts and render in the postsContainer
-    fetch(get_path())
+    // on load render the page 0 posts
+    fetch(getPath())
     .then(async r => await r.json())
     .then(r => {
+        morePosts(r.is_more)
         for (const post of r.posts) {
             createPost(post, null)
         }
     }).catch(e => {console.log(e)})
-
-    // onload of the document check if there are most posts to be displayed 
-    morePosts()
 
     ///
     //// Traversing through posts (previous and next buttons)
     ///
     nextButton = document.querySelector("#next");
     previousButton = document.querySelector("#previous");
-    nextButton.addEventListener("click", function() {
-
-        // load all the posts that are on page + 1 from current
-        page += 1;
-        fetch(get_path())
+    const traversingPosts = (isNext) => {
+        page = page + (isNext ? +1 : -1);
+        fetch(getPath())
         .then(async r => await r.json())
         .then(r => {
+            clearPosts()
+            morePosts(r.is_more)
             if (page >= 1 && previousButton.classList.contains("hidden")) {
                 previousButton.classList.remove("hidden")
-            }
-            morePosts()
-            clearPosts()
-            for (const post of r.posts) {
-                createPost(post)
-            }
-            window.scrollTo(0, 0)
-        }).catch(e => console.log(e))
-    })
-    previousButton.addEventListener("click", function() {
-
-        page -= 1;
-        fetch(get_path())
-        .then(async r => await r.json())
-        .then(r => {
-            if (page == 0 && previousButton.classList.contains("hidden") == false) {
+            } else if (page == 0) {
                 previousButton.classList.add("hidden")
             }
-            morePosts()
-            clearPosts()
             for (const post of r.posts) {
                 createPost(post, null)
             }
-        }).catch(e => console.error(e))
+            window.scrollTo(0, 0)
+        }).catch(e => console.log(e))
+    }
+    nextButton.addEventListener("click", function() {
+        traversingPosts(true)
+    })
+    previousButton.addEventListener("click", function() {
+        traversingPosts(false)
     })
 
     ///

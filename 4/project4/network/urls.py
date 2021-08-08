@@ -13,5 +13,4 @@ urlpatterns = [
     path("users/<int:id>", views.users, name="users"),
     path("users/<int:id>/following", views.following, name="following"),
     path("following", views.following, name="following"),
-    path("is_more", views.is_more_to_load, name="is_more")
 ]

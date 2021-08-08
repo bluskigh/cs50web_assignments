@@ -21,58 +21,23 @@ class PostForm(forms.Form):
 
 def get_posts(request, posts):
     """ Returns 10 post depending on the start and end that is found in the
-    url arguments"""
+    url arguments."""
+    posts = [post.clean() for post in posts]
     page = int(request.GET.get("page") or 0)
     start = page * 10
     end = start + 10
-    posts = reverse_chronological_order(posts)
     return posts[start:end]
 
 
-
 def get_limited(posts, limit):
+    posts = reversed(posts)
     viewed = {}
-    # FIND a way to make this faster very slow (also used in def posts).
     for post in posts:
-        temp = viewed.get(post.user.id)
-
-        if temp is None:
+        if viewed.get(post.user.id) is None:
             viewed[post.user.id] = []
-
         if len(viewed[post.user.id]) < limit:
             viewed[post.user.id].append(post)
-
-    final = [post for posts in viewed.values() for post in posts]
-    return final
-
-
-def is_more_to_load(request):
-    # the end of the current user, ex currently viewing 0 - 10, in order
-    # for next to show we want to know if there is more than the current
-    # end... 10, are there 11 posts? if so show next button (return true)
-    posts = None
-    if request.GET.get("following"):
-        posts = len(get_limited([post for user in request.user.following.all() for post in user.to.posts.all()], 3))
-    elif request.GET.get("userid"):
-        posts = User.objects.get(id=int(request.GET.get("userid"))).posts.count()
-    else:
-        # 5 per user on all posts
-        posts = len(get_limited(Post.objects.all(), 5))
-    
-    page = int(request.GET.get("page") or 1) + 1
-    return JsonResponse({"result": posts - page*10 > 0})
-
-
-def reverse_chronological_order(posts):
-    # from chronological order to reverse chronological order
-    posts = [post.clean() for post in posts]
-    for index, post in enumerate(posts):
-        if index == len(posts)//2:
-            break
-        temp = posts[index]
-        posts[index] = posts[-index-1]
-        posts[-index-1] = temp
-    return posts
+    return [post for viewed_posts in viewed.values() for post in viewed_posts]
 
 
 def index(request):
@@ -86,44 +51,47 @@ def users(request, id):
     user = User.objects.get(id=id)
     if user is None:
         return Http404(f"Could not find user with id of: {id}")
-    is_following = None
-    if request.user.id != id:
-        is_following = request.user.following.filter(to__id=user.id).exists()
     return render(request, "network/view_user.html", {
         "id": user.id,
         "username": user.username,
         "followers": user.followers.all(),
         "following": user.following.all(),
-        "is_following": is_following,
+        "is_following": request.user.following.filter(to__id=user.id).exists() if request.user.id != id else None,
         "edit_post_form": PostForm()})
 
 
 @login_required
 def posts(request):
     if request.method == "GET":
-        # if attempting to get a specific post 
-        id = request.GET.get("id")
         userid = request.GET.get("userid")
-        if id and userid is None:
-            id = int(id)
-            post = Post.objects.get(id=id)
-            return JsonResponse({"title": post.title, "text": post.text})
+        following = request.GET.get("following")
+        page = int(request.GET.get("page") or 1) + 1
+        posts = None
+        if request.GET.get("following"):
+            # following page requirement: show less posts from users 
+            posts = get_limited([post for user in 
+                request.user.following.all() 
+                for post in user.to.posts.all()], 3)
         elif userid:
-            return JsonResponse({"posts": get_posts(request, User.objects.get(id=int(userid)).posts.all())})
-        # otherwise return all posts
+            # viewing user show all posts
+            posts = User.objects.get(id=int(
+                userid)).posts.all()
         else:
-            final = get_limited(Post.objects.all(), 5)
-            return JsonResponse({"posts":  get_posts(request, final), 
-                "userid": request.user.id})
-
-
+            # on view all posts page, show 5 per user
+            posts = get_limited(Post.objects.all(), 5)
+        # returning userid because on js we want to determine if a
+        # post is the users posts that is making the request, to add edit
+        # button to the relative post.
+        return JsonResponse({
+            "posts":  get_posts(request, posts), 
+            "userid": request.user.id,
+            "is_more": len(posts) - page*10 > 0})
     elif request.method == "POST":
         data = loads(request.body) 
         if data.get("title") is None or data.get("text") is None:
             return HttpResponse("Bad Request", status=400)
         post = Post.objects.create(title=data.get("title"), 
-                text=data.get("text"),
-            user=request.user)
+                text=data.get("text"), user=request.user)
         return JsonResponse(post.clean()) 
     elif request.method == "PATCH":
         # getting data sent via json
@@ -137,22 +105,16 @@ def posts(request):
         # of the post
         if post.user.id != request.user.id:
             return HttpResponse("Unauthorized", status=401) 
-        try:
-            data = loads(request.body)
-            title = data.get("title")
-            text = data.get("text")
-            if title is not None and (title != post.title):
-                post.title = title
-            if text is not None and (text != post.text):
-                post.text = text
-            post.updated = True
-            post.save()
-            return HttpResponse("Updated", status=200)
-        except Exception as e:
-            print(e)
-            return HttpResponse("Server Error", status=500)
-    # TODO change this 
-    return Http404('You are not supposed to get here.')
+        data = loads(request.body)
+        title = data.get("title")
+        text = data.get("text")
+        if title is not None and (title != post.title):
+            post.title = title
+        if text is not None and (text != post.text):
+            post.text = text
+        post.updated = True
+        post.save()
+        return HttpResponse("Updated", status=200)
 
 
 def likes(request):
@@ -173,7 +135,6 @@ def likes(request):
     elif request.method == "DELETE":
         # remove from liked
         like = post.likes.get(user__id=request.user.id)
-        # remove from database, which will remove from post likes too?
         like.delete()
         return HttpResponse(status=200)
 
@@ -181,26 +142,15 @@ def likes(request):
 @login_required
 def following(request, id=None):
     if request.method == "GET":
-        posts = []
-        for following in request.user.following.all():
-            # for relevancy reasons, showing the top 3 most recent posts
-            for post in reverse_chronological_order(list(
-                following.to.posts.all())[-4:-1]):posts.append(post)
-        if request.GET.get("page") is None:
-            return render(request, "network/view_following.html")
-        else:
-            return JsonResponse({"posts": posts})
-    # otherwise might be a delete or post request
+        return render(request, "network/view_following.html")
     user = User.objects.get(id=id)
     if user is None:
         return Http404(f"Could not find user id of: {id}")
     message = None 
-    # if not data.get("following_state"): 
     if request.method == "POST":
-        # follow the user
         # check if already following the user
         if request.user.following.filter(to__id=user.id).exists():
-            return HttpResponse(409)
+            return HttpResponse("Already following this user.", status=409)
         Follow.objects.create(who=request.user, to=user)
         message = "Followed the user"
     elif request.method == "DELETE":
