@@ -29,17 +29,38 @@ def get_posts(request, posts):
     return posts[start:end]
 
 
+
+def get_limited(posts, limit):
+    viewed = {}
+    # FIND a way to make this faster very slow (also used in def posts).
+    for post in posts:
+        temp = viewed.get(post.user.id)
+
+        if temp is None:
+            viewed[post.user.id] = []
+
+        if len(viewed[post.user.id]) < limit:
+            viewed[post.user.id].append(post)
+
+    final = [post for posts in viewed.values() for post in posts]
+    return final
+
+
 def is_more_to_load(request):
     # the end of the current user, ex currently viewing 0 - 10, in order
     # for next to show we want to know if there is more than the current
     # end... 10, are there 11 posts? if so show next button (return true)
     posts = None
     if request.GET.get("following"):
-        posts = request.user.following.count()
+        posts = len(get_limited([post for user in request.user.following.all() for post in user.to.posts.all()], 3))
+    elif request.GET.get("userid"):
+        posts = User.objects.get(id=int(request.GET.get("userid"))).posts.count()
     else:
-        posts = Post.objects.count()
-    page = request.GET.get("page") or 1 
-    return JsonResponse({"result": posts - int(page)*10 > 0})
+        # 5 per user on all posts
+        posts = len(get_limited(Post.objects.all(), 5))
+    
+    page = int(request.GET.get("page") or 1) + 1
+    return JsonResponse({"result": posts - page*10 > 0})
 
 
 def reverse_chronological_order(posts):
@@ -73,8 +94,8 @@ def users(request, id):
         "username": user.username,
         "followers": user.followers.all(),
         "following": user.following.all(),
-        "is_following": is_following
-        })
+        "is_following": is_following,
+        "edit_post_form": PostForm()})
 
 
 @login_required
@@ -87,12 +108,15 @@ def posts(request):
             id = int(id)
             post = Post.objects.get(id=id)
             return JsonResponse({"title": post.title, "text": post.text})
-        # otherwise return all posts
         elif userid:
             return JsonResponse({"posts": get_posts(request, User.objects.get(id=int(userid)).posts.all())})
+        # otherwise return all posts
         else:
-            return JsonResponse({"posts":  get_posts(request, 
-                Post.objects.all()), "userid": request.user.id})
+            final = get_limited(Post.objects.all(), 5)
+            return JsonResponse({"posts":  get_posts(request, final), 
+                "userid": request.user.id})
+
+
     elif request.method == "POST":
         data = loads(request.body) 
         if data.get("title") is None or data.get("text") is None:
@@ -100,7 +124,6 @@ def posts(request):
         post = Post.objects.create(title=data.get("title"), 
                 text=data.get("text"),
             user=request.user)
-        print(post.created)
         return JsonResponse(post.clean()) 
     elif request.method == "PATCH":
         # getting data sent via json
@@ -140,7 +163,6 @@ def likes(request):
     if post is None:
         return Http404(f"Could not find a post with id of: {id}")
     if request.method == "POST":
-        print(f"The user wants to add a like to post: {post.title}")
         # check if the user already liked
         # using field clause = WHERE clause in SQL -> https://docs.djangoproject.com/en/3.2/ref/models/querysets/#field-lookups
         if post.likes.filter(user__id=request.user.id).exists():
@@ -151,7 +173,6 @@ def likes(request):
     elif request.method == "DELETE":
         # remove from liked
         like = post.likes.get(user__id=request.user.id)
-        print(f"The user wants a remove a like from: {post.title}")
         # remove from database, which will remove from post likes too?
         like.delete()
         return HttpResponse(status=200)
@@ -164,8 +185,7 @@ def following(request, id=None):
         for following in request.user.following.all():
             # for relevancy reasons, showing the top 3 most recent posts
             for post in reverse_chronological_order(list(
-                following.to.posts.all())[-4:-1]):
-                posts.append(post)
+                following.to.posts.all())[-4:-1]):posts.append(post)
         if request.GET.get("page") is None:
             return render(request, "network/view_following.html")
         else:

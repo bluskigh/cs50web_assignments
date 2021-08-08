@@ -132,9 +132,18 @@ function createPost(post_information, form=null) {
     }
 } 
 
+var path = document.location.pathname == "/" || document.location.pathname.indexOf("users") >= 0; 
+const onUserPage = () => document.location.pathname.indexOf("users") == 1 ? "&userid=" + getUserId() : "";
+const proxy = new Proxy(document.location.pathname.split('/'), {
+    get(target, property) {
+        return target[target.length+parseInt(property)]
+    }
+})
+const getUserId = () => proxy[-1];
+
 function morePosts() {
 
-    fetch(`/is_more?page=${page}${document.location.pathname == '/following' ? "&following=True" : ""}`)
+    fetch(`/is_more?page=${page}${document.location.pathname == '/following' ? "&following=True" : ""}${onUserPage()}`)
     .then(async r => await r.json())
     .then(r => {
         if (r.result) {
@@ -156,17 +165,13 @@ document.addEventListener("DOMContentLoaded", function() {
     userid = parseInt(document.querySelector("nav").dataset.userId);
     postsContainer = document.querySelector("#posts"); 
 
-    var path = document.location.pathname == "/"; 
-    if (document.location.pathname.indexOf("users") == 1) {
-        var id = document.location.pathname.split('/');
-        id = id[id.length-1];
-        path = `/posts?userid=${id}`
-    } else if (path) {
+    if (path) {
         path = "/posts"
     } else {
         path = "/following"
     }
-    const get_path = () => `${path}?page=${page}`;
+
+    const get_path = () => `${path}?page=${page}${onUserPage()}`;
 
     editForm = document.querySelector("#edit-form");
     editTitleInput = editForm.querySelector("#id_title");
