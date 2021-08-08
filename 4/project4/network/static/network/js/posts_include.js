@@ -1,4 +1,4 @@
-var postsContainer, nextButton, previousButton, editForm, editTitleInput, editTextInput, userid;
+var postsContainer, nextButton, previousButton, editForm, editTextInput, userid;
 
 // default page 0 of all posts
 var page = 0;
@@ -38,7 +38,7 @@ function like(e) {
                 this.classList.remove("svg-active")
             }
         } else {
-            alert("Something went wrong... (Action: like)")
+            alert("You have to be signed in to like.")
         }
     }).catch(e => {alert("Something went wrong... (action: like)")})
 
@@ -58,10 +58,9 @@ function createPost(post_information, form=null) {
     const who = document.createElement("a");
     who.setAttribute('href', `/users/${post_information.user_id}`)
     who.innerText = post_information.username;
-    const header = document.createElement("h3");
-    header.innerText = post_information.title;
     const paragraph = document.createElement("p");
-    paragraph.innerText = post_information.text;
+    paragraph.innerText = `"${post_information.text}"`;
+    paragraph.classList.add("text")
     const optionsContainer = document.createElement("div");
     optionsContainer.classList.add("options")
     const heartSpan = document.createElement("span");
@@ -102,12 +101,10 @@ function createPost(post_information, form=null) {
             // add editing class
             parentElement.classList.toggle("editing");
             parentElement.appendChild(editForm);
-            editTitleInput.value = this.parentElement.querySelector("h3").innerText;
             editTextInput.value = this.parentElement.querySelector("p").innerText;
         })
     }
     tempContentContainer.appendChild(who)
-    tempContentContainer.appendChild(header)
     tempContentContainer.appendChild(paragraph)
     tempContentContainer.appendChild(optionsContainer)
     tempContentContainer.appendChild(time)
@@ -148,18 +145,24 @@ document.addEventListener("DOMContentLoaded", function() {
     const getPath = () => `/posts?page=${page}${onUserPage()}${document.location.pathname == '/following' ? "&following=True" : ""}`;
 
     editForm = document.querySelector("#edit-form");
-    editTitleInput = editForm.querySelector("#id_title");
     editTextInput = editForm.querySelector("#id_text");
 
     // on load render the page 0 posts
     fetch(getPath())
     .then(async r => await r.json())
     .then(r => {
-        morePosts(r.is_more)
-        for (const post of r.posts) {
-            createPost(post, null)
+        if (r.reason) {
+            const temp = document.createElement("p");
+            temp.style.margin = ".5em 1em"
+            temp.innerText = r.reason;
+            postsContainer.appendChild(temp)
+        } else {
+            morePosts(r.is_more)
+            for (const post of r.posts) {
+                createPost(post, null)
+            }
         }
-    }).catch(e => {console.log(e)})
+    }).catch(e => {console.log(e);console.log(e.status);})
 
     ///
     //// Traversing through posts (previous and next buttons)
@@ -204,7 +207,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // erasing the input since its not going to belong to anything anymore, when it belongs
         // to a post, then it will be filled with the posts information.
-        editTitleInput.value = null;
         editTextInput.value = null;
     };
 
@@ -222,15 +224,13 @@ document.addEventListener("DOMContentLoaded", function() {
                 "Content-Type": "application/json"
             }),
             body: JSON.stringify({
-                title: editTitleInput.value,
                 text: editTextInput.value
             })
         })
         .then(r => {
             // success, edit the text of the post and hide this form
-            // replacing the text of the post title and text with the patched version
-            editForm.parentElement.querySelector("h3").innerText = editTitleInput.value;
-            editForm.parentElement.querySelector("p").innerText = editTextInput.value;
+            // replacing the text of the post text with the patched version
+            editForm.parentElement.querySelector("p").innerText = editTextInput.value.trim();
             hideForm()
         }).catch(e => {console.log(e);})
     })

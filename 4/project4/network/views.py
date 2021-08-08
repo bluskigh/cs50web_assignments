@@ -2,19 +2,28 @@ from datetime import datetime
 from json import loads
 
 from django import forms
-from django.contrib.auth import authenticate, login, logout 
+from django.contrib.auth import (
+        authenticate, 
+        login, 
+        logout 
+)
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect, Http404, JsonResponse
+from django.http import (
+        HttpResponse, 
+        HttpResponseRedirect, 
+        Http404, 
+        JsonResponse
+)
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Comment, Like, Post, Follow
+from .models import User, Comment, Post, Follow
 
 
 class PostForm(forms.Form):
-    title = forms.CharField(max_length=64, widget=forms.TextInput(attrs=
-        {"placeholder": "Enter title"}))
+    # title = forms.CharField(max_length=64, widget=forms.TextInput(attrs=
+        # {"placeholder": "Enter title"}))
     text = forms.CharField(max_length=240, widget=forms.Textarea(attrs=
         {"placeholder": "Enter your message..."}))
 
@@ -30,14 +39,15 @@ def get_posts(request, posts):
 
 
 def get_limited(posts, limit):
-    posts = reversed(posts)
     viewed = {}
+    final = []
     for post in posts:
         if viewed.get(post.user.id) is None:
-            viewed[post.user.id] = []
-        if len(viewed[post.user.id]) < limit:
-            viewed[post.user.id].append(post)
-    return [post for viewed_posts in viewed.values() for post in viewed_posts]
+            viewed[post.user.id] = 1
+        if viewed[post.user.id] <= limit:
+            final.append(post)
+            viewed[post.user.id] += 1
+    return final 
 
 
 def index(request):
@@ -54,14 +64,16 @@ def users(request, id):
     return render(request, "network/view_user.html", {
         "id": user.id,
         "username": user.username,
-        "followers": user.followers.all(),
-        "following": user.following.all(),
-        "is_following": request.user.following.filter(to__id=user.id).exists() if request.user.id != id else None,
+        "followers": user.followers.count(),
+        "following": user.following.count(),
+        "is_following": request.user.following.filter(
+            to__id=user.id).exists() if request.user.id != id else None,
         "edit_post_form": PostForm()})
 
 
-@login_required
 def posts(request):
+    # Could have filtered by id since the highest id is the most recent post. 
+    # added by the user, but wanted to work with time. 
     if request.method == "GET":
         userid = request.GET.get("userid")
         following = request.GET.get("following")
@@ -69,16 +81,19 @@ def posts(request):
         posts = None
         if request.GET.get("following"):
             # following page requirement: show less posts from users 
+            if request.user.following.count() == 0:
+                return JsonResponse({
+                    "reason": "You're not following anyone"}, status=400)
             posts = get_limited([post for user in 
                 request.user.following.all() 
-                for post in user.to.posts.all()], 3)
+                for post in user.to.posts.order_by("-created__time")], 3)
         elif userid:
             # viewing user show all posts
-            posts = User.objects.get(id=int(
-                userid)).posts.all()
+            posts = User.objects.get(id=int(userid)).posts.filter(
+                    user__id=userid).order_by("-created__time")
         else:
             # on view all posts page, show 5 per user
-            posts = get_limited(Post.objects.all(), 5)
+            posts = get_limited(Post.objects.order_by("-created__time"), 5)
         # returning userid because on js we want to determine if a
         # post is the users posts that is making the request, to add edit
         # button to the relative post.
@@ -86,14 +101,13 @@ def posts(request):
             "posts":  get_posts(request, posts), 
             "userid": request.user.id,
             "is_more": len(posts) - page*10 > 0})
-    elif request.method == "POST":
+    elif request.method == "POST" and request.user.is_authenticated:
         data = loads(request.body) 
-        if data.get("title") is None or data.get("text") is None:
+        if data.get("text") is None:
             return HttpResponse("Bad Request", status=400)
-        post = Post.objects.create(title=data.get("title"), 
-                text=data.get("text"), user=request.user)
+        post = Post.objects.create(text=data.get("text"), user=request.user)
         return JsonResponse(post.clean()) 
-    elif request.method == "PATCH":
+    elif request.method == "PATCH" and request.user.is_authenticated:
         # getting data sent via json
         id = request.GET.get("id")
         if id is None:
@@ -106,10 +120,7 @@ def posts(request):
         if post.user.id != request.user.id:
             return HttpResponse("Unauthorized", status=401) 
         data = loads(request.body)
-        title = data.get("title")
         text = data.get("text")
-        if title is not None and (title != post.title):
-            post.title = title
         if text is not None and (text != post.text):
             post.text = text
         post.updated = True
@@ -118,6 +129,8 @@ def posts(request):
 
 
 def likes(request):
+    if not request.user.is_authenticated:
+        return HttpResponse(status=409)
     id = loads(request.body).get("post_id")
     if id is None:
             return HttpResponse("Bad Request", status=300)
@@ -126,16 +139,16 @@ def likes(request):
         return Http404(f"Could not find a post with id of: {id}")
     if request.method == "POST":
         # check if the user already liked
-        # using field clause = WHERE clause in SQL -> https://docs.djangoproject.com/en/3.2/ref/models/querysets/#field-lookups
-        if post.likes.filter(user__id=request.user.id).exists():
+        if post.likes.filter(id=request.user.id).exists():
             return HttpResponse(status=409)
         # add a like that belongs to the user
-        post.likes.create(user=request.user)
+        post.likes.add(request.user)
+        # post.likes.create(user=request.user)
         return HttpResponse(status=200)
     elif request.method == "DELETE":
         # remove from liked
-        like = post.likes.get(user__id=request.user.id)
-        like.delete()
+        like = post.likes.get(id=request.user.id)
+        post.likes.remove(like)
         return HttpResponse(status=200)
 
 
@@ -162,12 +175,10 @@ def following(request, id=None):
 
 def login_view(request):
     if request.method == "POST":
-
         # Attempt to sign user in
         username = request.POST["username"]
         password = request.POST["password"]
         user = authenticate(request, username=username, password=password)
-
         # Check if authentication successful
         if user is not None:
             login(request, user)
@@ -189,7 +200,6 @@ def register(request):
     if request.method == "POST":
         username = request.POST["username"]
         email = request.POST["email"]
-
         # Ensure password matches confirmation
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
@@ -197,7 +207,6 @@ def register(request):
             return render(request, "network/register.html", {
                 "message": "Passwords must match."
             })
-
         # Attempt to create new user
         try:
             user = User.objects.create_user(username, email, password)

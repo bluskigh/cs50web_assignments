@@ -37,8 +37,7 @@
                 }),
                 body: JSON.stringify({
 
-                    "title": addPostForm.querySelector("#id_title").value,
-                    "text": addPostForm.querySelector("#id_text").value
+                    "text": addPostForm.querySelector("#id_text").value.trim()
                 })
             })
             .then(async r => await r.json())

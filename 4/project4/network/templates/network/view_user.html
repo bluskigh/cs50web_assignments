@@ -2,8 +2,8 @@
 {% block title %}{{ username }}{% endblock %}
 {% block body %}
 <h1 style="margin-left: .5em;">{{ username }}</h1>
-<p style="margin-left: 1.5em;">Following: {{ following|length }}</p>
-<p style="margin-left: 1.5em;">Followers: <span id="followers">{{ followers|length }}</span></p>
+<p style="margin-left: 1.5em;">Following: {{ following }}</p>
+<p style="margin-left: 1.5em;">Followers: <span id="followers">{{ followers }}</span></p>
 {% if request.user.id != id %}
 <form action="#" id="follow-form">
     {% csrf_token %}
