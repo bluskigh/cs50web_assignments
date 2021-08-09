@@ -79,7 +79,11 @@ def posts(request):
         following = request.GET.get("following")
         page = int(request.GET.get("page") or 1) + 1
         posts = None
-        if request.GET.get("following"):
+        id = request.GET.get("id")
+        if id:
+            post = Post.objects.get(id=int(id))
+            return JsonResponse(post.clean())
+        if following:
             # following page requirement: show less posts from users 
             if request.user.following.count() == 0:
                 return JsonResponse({
@@ -126,6 +130,7 @@ def posts(request):
         post.updated = True
         post.save()
         return HttpResponse("Updated", status=200)
+    return HttpResponse(status=401)
 
 
 def likes(request):
